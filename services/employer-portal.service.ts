@@ -1,0 +1,322 @@
+import axiosClient from "@/lib/axios";
+import { handleAxiosError } from "@/utils/helper";
+import type { PublicCv } from "@/app/types/cv.type";
+
+export type EmployerSuggestedResumePreview =
+  | { kind: "upload"; fileUrl: string }
+  | { kind: "template"; cv: PublicCv };
+
+export type EmployerSuggestedCandidateCvResponse = {
+  candidate: {
+    id: number;
+    user: {
+      id: number;
+      username: string;
+      email: string;
+      avatar: string | null;
+    };
+    province: { name: string } | null;
+    district: { name: string } | null;
+  };
+  resume: {
+    id: number;
+    title: string;
+    updatedAt: string;
+    preview: EmployerSuggestedResumePreview;
+  } | null;
+};
+
+export type EmployerApplicationPreview = {
+  applicationId: number;
+  coverLetter: string | null;
+  job: { id: number; title: string };
+  candidate: {
+    user: { id: number; username: string; email: string };
+    province?: { name: string } | null;
+    district?: { name: string } | null;
+  };
+  resume:
+    | { kind: "none" }
+    | { kind: "upload"; title: string; fileUrl: string }
+    | { kind: "template"; title: string; cv: PublicCv };
+};
+
+export type EmployerFormMeta = {
+  company: {
+    id: number;
+    name: string;
+    description: string | null;
+    logo: string | null;
+    website: string | null;
+    location: string;
+    status: boolean;
+    provinceId: number;
+    districtId: number;
+  };
+  categories: {
+    id: number;
+    name: string;
+    slug?: string;
+    parentCategoryId: number;
+  }[];
+  parentCategories: {
+    id: number;
+    name: string;
+    slug?: string;
+  }[];
+  selectedParentCategoryIds: number[];
+  skills: { id: number; name: string }[];
+};
+
+export type EmployerDashboardData = {
+  company: { id: number; name: string; logo: string | null; status: boolean };
+  user: { id: number; username: string; email: string };
+  stats: {
+    jobs: {
+      total: number;
+      pending: number;
+      approved: number;
+      rejected: number;
+    };
+    applications: {
+      total: number;
+      pending: number;
+      reviewed: number;
+      accepted: number;
+      rejected: number;
+    };
+  };
+  recentJobs: Array<{
+    id: number;
+    title: string;
+    moderationStatus: string;
+    category?: { id: number; name: string };
+    _count?: { applications: number };
+  }>;
+  recentApplications: Array<{
+    id: number;
+    status: string;
+    createdAt: string;
+    candidate: {
+      user: { id: number; username: string; email: string };
+    };
+    job: { id: number; title: string };
+    resume?: { id: number; title: string } | null;
+  }>;
+};
+
+export const employerPortalService = {
+  async me() {
+    try {
+      const res = await axiosClient.get("/employer-portal/me");
+      return res.data as {
+        employer: { id: number; companyId: number; status: string };
+        company: {
+          id: number;
+          name: string;
+          logo: string | null;
+          status: boolean;
+        };
+      };
+    } catch (e) {
+      throw handleAxiosError(e);
+    }
+  },
+
+  async listCompanyMembers() {
+    try {
+      const res = await axiosClient.get<{
+        members: Array<{
+          employerId: number;
+          userId: number;
+          username: string;
+          email: string | null;
+          phone: string | null;
+        }>;
+      }>("/employer-portal/company-members");
+      return res.data.members;
+    } catch (e) {
+      throw handleAxiosError(e);
+    }
+  },
+
+  async dashboard() {
+    try {
+      const res = await axiosClient.get("/employer-portal/dashboard");
+      return res.data as EmployerDashboardData;
+    } catch (e) {
+      throw handleAxiosError(e);
+    }
+  },
+
+  async formMeta() {
+    try {
+      const res = await axiosClient.get("/employer-portal/form-meta");
+      return res.data as EmployerFormMeta;
+    } catch (e) {
+      throw handleAxiosError(e);
+    }
+  },
+
+  async updateCompany(body: {
+    name: string;
+    description?: string;
+    location: string;
+    website?: string;
+    logo?: string;
+    provinceId: number;
+    districtId: number;
+    categoryIds: number[];
+  }) {
+    try {
+      const res = await axiosClient.patch("/employer-portal/company", body);
+      return res.data as { success: boolean; data: unknown };
+    } catch (e) {
+      throw handleAxiosError(e);
+    }
+  },
+
+  async listJobs(params: string) {
+    try {
+      const res = await axiosClient.get(`/employer-portal/jobs?${params}`);
+      return res.data as {
+        jobs: unknown[];
+        pagination: {
+          total: number;
+          page: number;
+          limit: number;
+          totalPages: number;
+        };
+      };
+    } catch (e) {
+      throw handleAxiosError(e);
+    }
+  },
+
+  async getJob(id: number) {
+    try {
+      const res = await axiosClient.get(`/employer-portal/jobs/${id}`);
+      return res.data;
+    } catch (e) {
+      throw handleAxiosError(e);
+    }
+  },
+
+  async createJob(body: Record<string, unknown>) {
+    try {
+      const res = await axiosClient.post("/employer-portal/jobs", body);
+      return res.data;
+    } catch (e) {
+      throw handleAxiosError(e);
+    }
+  },
+
+  async updateJob(id: number, body: Record<string, unknown>) {
+    try {
+      const res = await axiosClient.patch(`/employer-portal/jobs/${id}`, body);
+      return res.data;
+    } catch (e) {
+      throw handleAxiosError(e);
+    }
+  },
+
+  async deleteJob(id: number) {
+    try {
+      const res = await axiosClient.delete(`/employer-portal/jobs/${id}`);
+      return res.data;
+    } catch (e) {
+      throw handleAxiosError(e);
+    }
+  },
+
+  async listApplications(params: string) {
+    try {
+      const res = await axiosClient.get(
+        `/employer-portal/applications?${params}`,
+      );
+      return res.data as {
+        applications: unknown[];
+        pagination: {
+          total: number;
+          page: number;
+          limit: number;
+          totalPages: number;
+        };
+      };
+    } catch (e) {
+      throw handleAxiosError(e);
+    }
+  },
+
+  async updateApplicationStatus(id: number, status: string) {
+    try {
+      const res = await axiosClient.patch(
+        `/employer-portal/applications/${id}/status`,
+        { status },
+      );
+      return res.data;
+    } catch (e) {
+      throw handleAxiosError(e);
+    }
+  },
+
+  async suggestedCandidates(limit?: number) {
+    try {
+      const qs =
+        limit != null ? `?limit=${encodeURIComponent(String(limit))}` : "";
+      const res = await axiosClient.get<{
+        items: Array<{
+          candidateId: number;
+          user: {
+            id: number;
+            username: string;
+            email: string;
+            avatar: string | null;
+          };
+          province: { name: string } | null;
+          district: { name: string } | null;
+          reason: "applied" | "category_match";
+          hint: string;
+        }>;
+      }>(`/employer-portal/suggested-candidates${qs}`);
+      return res.data;
+    } catch (e) {
+      throw handleAxiosError(e);
+    }
+  },
+
+  async getSuggestedCandidateCv(candidateId: number) {
+    try {
+      const res = await axiosClient.get<EmployerSuggestedCandidateCvResponse>(
+        `/employer-portal/suggested-candidates/${candidateId}/cv`,
+      );
+      return res.data;
+    } catch (e) {
+      throw handleAxiosError(e);
+    }
+  },
+
+  async getApplicationPreview(applicationId: number) {
+    try {
+      const res = await axiosClient.get<EmployerApplicationPreview>(
+        `/employer-portal/applications/${encodeURIComponent(String(applicationId))}/preview`,
+      );
+      return res.data;
+    } catch (e) {
+      throw handleAxiosError(e);
+    }
+  },
+
+  async createEmployerInvite(body: { email: string }) {
+    try {
+      const res = await axiosClient.post<{
+        inviteUrl: string;
+        token: string;
+        emailSent: boolean;
+      }>("/employer-portal/invites", body);
+      return res.data;
+    } catch (e) {
+      throw handleAxiosError(e);
+    }
+  },
+};
