@@ -38,7 +38,7 @@ export async function getCachedHomeBlogPosts(): Promise<PublicBlogPost[]> {
   if (!base) return [];
   try {
     const res = await fetch(`${base}/blog-posts?page=1&limit=3`, {
-      ...nextFetchCache.blogLive,
+      ...nextFetchCache.blog,
     });
     if (!res.ok) return [];
     const body = (await res.json()) as { posts?: PublicBlogPost[] };
