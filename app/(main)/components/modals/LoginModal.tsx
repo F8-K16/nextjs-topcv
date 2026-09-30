@@ -16,10 +16,13 @@ const initialState: LoginState = {};
 
 export default function LoginModal() {
   const { isOpen, type, closeModal } = useModalStore();
+  const isEmployerLogin = type === "employer-login";
 
   const apiBase = API_BASE_URL?.replace(/\/$/, "") ?? "";
   const [state, action, pending] = useActionState(loginAction, initialState);
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   useEffect(() => {
     const handleLogin = async () => {
@@ -28,27 +31,28 @@ export default function LoginModal() {
       const res = await getCurrentUser();
       if (!res) return;
 
+      const employerLogin = useModalStore.getState().type === "employer-login";
       closeModal();
+      if (employerLogin) {
+        window.location.href = "/employer";
+        return;
+      }
       window.location.reload();
     };
 
     handleLogin();
   }, [state.success, closeModal]);
 
-  if (!isOpen || type !== "login") return null;
+  if (!isOpen || (type !== "login" && type !== "employer-login")) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center px-4">
       <div className="w-full max-w-140 bg-white rounded-md overflow-hidden shadow-xl animate-in fade-in zoom-in-95">
         <div className="flex items-center justify-between border-b px-6 py-4">
           <div className="flex gap-8 font-semibold text-gray-700">
-            <button className="text-[#00b14f] border-b-2 border-[#00b14f] pb-1">
-              Đăng Nhập
+            <button className="border-b-2 border-[#00b14f] pb-1 text-[#00b14f]">
+              {isEmployerLogin ? "Nhà tuyển dụng" : "Đăng nhập"}
             </button>
-
-            <Link href="/auth/sign-up" className="hover:text-[#00b14f]">
-              Đăng Ký
-            </Link>
           </div>
 
           <button onClick={closeModal}>
@@ -57,6 +61,11 @@ export default function LoginModal() {
         </div>
 
         <div className="p-6">
+          <p className="mb-4 text-sm text-zinc-600">
+            {isEmployerLogin
+              ? "Đăng nhập để đăng tuyển dụng và tìm hồ sơ ứng viên."
+              : "Đăng nhập để quản lý hồ sơ và ứng tuyển việc làm."}
+          </p>
           <form action={action} className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1">Email</label>
@@ -66,6 +75,8 @@ export default function LoginModal() {
                   type="text"
                   name="email"
                   placeholder="Nhập email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full border rounded px-12 py-2 outline-none focus:ring-2 focus:ring-green-500"
                 />
                 <Mail
@@ -89,6 +100,8 @@ export default function LoginModal() {
                   type={showPassword ? "text" : "password"}
                   name="password"
                   placeholder="Nhập mật khẩu"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full border rounded px-12 py-2 pr-12 outline-none focus:ring-2 focus:ring-green-500"
                 />
 
@@ -121,20 +134,40 @@ export default function LoginModal() {
               disabled={pending}
               className="w-full bg-[#00b14f] hover:bg-green-700 text-white py-2.5 rounded font-semibold disabled:opacity-50"
             >
-              {pending ? "Đang đăng nhập..." : "Đăng nhập"}
+              {pending
+                ? "Đang đăng nhập..."
+                : isEmployerLogin
+                  ? "Đăng nhập nhà tuyển dụng"
+                  : "Đăng nhập"}
             </button>
           </form>
 
-          <AuthSocialSection
-            googleAuthHref={apiBase ? `${apiBase}/auth/google` : undefined}
-          />
+          {isEmployerLogin ? null : (
+            <AuthSocialSection
+              googleAuthHref={apiBase ? `${apiBase}/auth/google` : undefined}
+            />
+          )}
 
-          <div className="flex justify-between text-sm mt-6">
+          <div className="mt-6 flex justify-between gap-3 text-sm">
             <p>
-              Bạn chưa có tài khoản?{" "}
-              <Link href="/auth/sign-up" className="text-[#00b14f] font-medium">
-                Đăng ký ngay
-              </Link>
+              {isEmployerLogin ? "Chưa có tài khoản doanh nghiệp? " : "Bạn chưa có tài khoản? "}
+              {isEmployerLogin ? (
+                <Link
+                  href="/auth/sign-up/employer"
+                  onClick={closeModal}
+                  className="font-medium text-[#00b14f]"
+                >
+                  Đăng ký nhà tuyển dụng
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => useModalStore.getState().openModal("register")}
+                  className="font-medium text-[#00b14f]"
+                >
+                  Đăng ký ngay
+                </button>
+              )}
             </p>
 
             <button className="text-[#00b14f] font-medium">

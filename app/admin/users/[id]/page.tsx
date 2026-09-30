@@ -6,7 +6,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { API_BASE_URL } from "@/lib/api-base-url";
 import { cn } from "@/lib/utils";
-import { adminSurfaceCardBlur } from "@/lib/admin-ui";
+import { adminPageTitle, adminSurfaceCardBlur } from "@/lib/admin-ui";
 
 export const metadata: Metadata = {
   title: "Chi tiết người dùng",
@@ -90,9 +90,7 @@ export default async function AdminUserDetailPage({
       </Link>
 
       <div className={cn(adminSurfaceCardBlur, "p-6 shadow-xl")}>
-        <h1 className="text-xl font-semibold text-zinc-900 dark:text-white">
-          {user.username}
-        </h1>
+        <h1 className={adminPageTitle}>{user.username}</h1>
         <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">ID #{user.id}</p>
 
         <dl className="mt-6 grid gap-4 sm:grid-cols-2">

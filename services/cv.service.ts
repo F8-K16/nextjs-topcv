@@ -27,7 +27,7 @@ export const cvService = {
     description?: string | null;
     thumbnailUrl?: string | null;
     templateData: Record<string, unknown>;
-    isActive?: boolean;
+    status?: boolean;
   }) {
     try {
       const { data } = await axiosClient.post<CvTemplate>(
@@ -47,7 +47,7 @@ export const cvService = {
       description?: string | null;
       thumbnailUrl?: string | null;
       templateData?: Record<string, unknown>;
-      isActive?: boolean;
+      status?: boolean;
     },
   ) {
     try {

@@ -58,8 +58,8 @@ export default function RecommendationsForm() {
   >({});
 
   useEffect(() => {
-    if (!meta) void fetchMeta();
-  }, [meta, fetchMeta]);
+    void fetchMeta();
+  }, [fetchMeta]);
 
   const profileQuery = useQuery({
     queryKey: ["recommendation-profile", userId],

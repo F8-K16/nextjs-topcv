@@ -4,6 +4,7 @@ import { Briefcase, ChevronRight } from "lucide-react";
 
 import type { Company } from "@/app/types/company.type";
 import { formatGeographyLine } from "@/utils/helper";
+import { companyPublicPath } from "@/lib/company-path";
 
 export default function TopCompaniesSection({
   companies,
@@ -36,7 +37,7 @@ export default function TopCompaniesSection({
           {companies.map((c) => (
             <Link
               key={c.id}
-              href={`/companies/${c.id}`}
+              href={companyPublicPath(c)}
               className="group flex flex-col rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-md"
             >
               <div className="flex items-start gap-3">
@@ -46,7 +47,7 @@ export default function TopCompaniesSection({
                     alt=""
                     width={56}
                     height={56}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-contain"
                   />
                 </div>
                 <div className="min-w-0 flex-1">

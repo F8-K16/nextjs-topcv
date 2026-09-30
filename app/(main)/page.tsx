@@ -12,8 +12,9 @@ import JobSection from "./components/home/JobSection";
 import TestimonialsSection from "./components/home/TestimonialsSection";
 import TopCompaniesSection from "./components/home/TopCompaniesSection";
 import WhyChooseUs from "./components/home/WhyChooseUs";
+import SalaryInsightSection from "./components/home/SalaryInsightSection";
 
-import { getCachedHomeTopCompanies } from "@/lib/home-data";
+import { getCachedHomeTopCompanies, getCachedHomeBlogPosts } from "@/lib/home-data";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
@@ -26,7 +27,10 @@ export const metadata: Metadata = {
 export const revalidate = 240;
 
 export default async function HomePage() {
-  const companiesPayload = await getCachedHomeTopCompanies();
+  const [companiesPayload, blogPosts] = await Promise.all([
+    getCachedHomeTopCompanies(),
+    getCachedHomeBlogPosts(),
+  ]);
 
   return (
     <div className="min-h-0 w-full min-w-0 max-w-[100vw] bg-zinc-50/50">
@@ -94,10 +98,11 @@ export default async function HomePage() {
       </div>
 
       <WhyChooseUs />
+      <SalaryInsightSection />
       <div className="hidden md:block">
         <TestimonialsSection />
       </div>
-      <BlogTeaserSection />
+      <BlogTeaserSection posts={blogPosts} />
     </div>
   );
 }

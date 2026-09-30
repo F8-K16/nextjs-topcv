@@ -17,8 +17,8 @@ export default function CompanyFilterSidebar() {
   const { fetchDistricts, districtsMap } = useLocationStore();
 
   useEffect(() => {
-    if (!data && !loading) void fetchMeta();
-  }, [data, loading, fetchMeta]);
+    void fetchMeta();
+  }, [fetchMeta]);
 
   const categoryOptions = useMemo(
     () =>

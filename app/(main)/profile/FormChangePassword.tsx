@@ -50,32 +50,34 @@ export default function FormChangePassword() {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="space-y-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm md:p-8"
+      className="space-y-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm md:p-8 dark:border-white/10 dark:bg-zinc-900/70 dark:shadow-black/20"
     >
       <div>
-        <h2 className="text-2xl font-bold text-gray-800">Đổi mật khẩu</h2>
-        <p className="text-sm text-gray-500 mt-1">
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
+          Đổi mật khẩu
+        </h2>
+        <p className="mt-1 text-sm text-gray-500 dark:text-zinc-400">
           Dùng mật khẩu mạnh và không dùng lại mật khẩu ở site khác.
         </p>
       </div>
 
       <div>
-        <label className="text-sm font-medium text-gray-700 mb-2 block">
+        <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-zinc-300">
           Mật khẩu hiện tại
         </label>
         <div className="relative">
-          <KeyRound className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <KeyRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-zinc-500" />
           <input
             type={showOld ? "text" : "password"}
             autoComplete="current-password"
             {...register("oldPassword")}
-            className="w-full border border-gray-300 rounded-xl pl-10 pr-12 py-3 focus:ring-2 focus:ring-[#00b14f] focus:border-[#00b14f] outline-none transition"
+            className="w-full rounded-xl border border-gray-300 bg-white py-3 pl-10 pr-12 text-gray-900 outline-none transition focus:border-[#00b14f] focus:ring-2 focus:ring-[#00b14f] dark:border-white/10 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder:text-zinc-500 dark:focus:border-violet-400 dark:focus:ring-violet-500/30"
             placeholder="••••••••"
           />
           <button
             type="button"
             onClick={() => setShowOld(!showOld)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#00b14f]"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#00b14f] dark:text-zinc-400 dark:hover:text-violet-300"
           >
             {showOld ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
@@ -86,22 +88,22 @@ export default function FormChangePassword() {
       </div>
 
       <div>
-        <label className="text-sm font-medium text-gray-700 mb-2 block">
+        <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-zinc-300">
           Mật khẩu mới
         </label>
         <div className="relative">
-          <KeyRound className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <KeyRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-zinc-500" />
           <input
             type={showNew ? "text" : "password"}
             autoComplete="new-password"
             {...register("newPassword")}
-            className="w-full border border-gray-300 rounded-xl pl-10 pr-12 py-3 focus:ring-2 focus:ring-[#00b14f] focus:border-[#00b14f] outline-none transition"
+            className="w-full rounded-xl border border-gray-300 bg-white py-3 pl-10 pr-12 text-gray-900 outline-none transition focus:border-[#00b14f] focus:ring-2 focus:ring-[#00b14f] dark:border-white/10 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder:text-zinc-500 dark:focus:border-violet-400 dark:focus:ring-violet-500/30"
             placeholder="Tối thiểu 6 ký tự"
           />
           <button
             type="button"
             onClick={() => setShowNew(!showNew)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#00b14f]"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#00b14f] dark:text-zinc-400 dark:hover:text-violet-300"
           >
             {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
@@ -112,22 +114,22 @@ export default function FormChangePassword() {
       </div>
 
       <div>
-        <label className="text-sm font-medium text-gray-700 mb-2 block">
+        <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-zinc-300">
           Nhập lại mật khẩu mới
         </label>
         <div className="relative">
-          <KeyRound className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <KeyRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-zinc-500" />
           <input
             type={showConfirm ? "text" : "password"}
             autoComplete="new-password"
             {...register("confirmPassword")}
-            className="w-full border border-gray-300 rounded-xl pl-10 pr-12 py-3 focus:ring-2 focus:ring-[#00b14f] focus:border-[#00b14f] outline-none transition"
+            className="w-full rounded-xl border border-gray-300 bg-white py-3 pl-10 pr-12 text-gray-900 outline-none transition focus:border-[#00b14f] focus:ring-2 focus:ring-[#00b14f] dark:border-white/10 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder:text-zinc-500 dark:focus:border-violet-400 dark:focus:ring-violet-500/30"
             placeholder="••••••••"
           />
           <button
             type="button"
             onClick={() => setShowConfirm(!showConfirm)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#00b14f]"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#00b14f] dark:text-zinc-400 dark:hover:text-violet-300"
           >
             {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
@@ -142,7 +144,7 @@ export default function FormChangePassword() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full h-12 rounded-xl bg-[#00b14f] hover:bg-[#009944] text-white font-semibold transition disabled:opacity-70 flex items-center justify-center gap-2"
+        className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#00b14f] font-semibold text-white transition hover:bg-[#009944] disabled:opacity-70 dark:bg-violet-600 dark:hover:bg-violet-500"
       >
         {isSubmitting ? (
           <>

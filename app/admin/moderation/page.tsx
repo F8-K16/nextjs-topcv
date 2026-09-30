@@ -7,8 +7,7 @@ import { ModerationStatCards } from "./ModerationStatCards";
 import PendingJobsTable from "./PendingJobsTable";
 import PendingUsersTable from "./PendingUsersTable";
 import { API_BASE_URL } from "@/lib/api-base-url";
-import { adminLead, adminPageTitle } from "@/lib/admin-ui";
-import { cn } from "@/lib/utils";
+import { AdminPageHeader } from "@/components/admin/admin-page-header";
 
 export const metadata: Metadata = {
   title: "Kiểm duyệt",
@@ -65,13 +64,10 @@ export default async function ModerationPage() {
 
   return (
     <div className="space-y-8">
-      <div className="space-y-2">
-        <h1 className={adminPageTitle}>Kiểm duyệt hệ thống</h1>
-        <p className={cn("max-w-2xl leading-relaxed", adminLead)}>
-          Duyệt tin tuyển dụng, kích hoạt tài khoản nhà tuyển dụng và theo dõi
-          tài khoản chưa xác thực email.
-        </p>
-      </div>
+      <AdminPageHeader
+        title="Kiểm duyệt hệ thống"
+        description="Duyệt tin tuyển dụng, kích hoạt tài khoản nhà tuyển dụng và theo dõi tài khoản chưa xác thực email."
+      />
 
       <ModerationStatCards
         jobsTotal={jobsTotal}

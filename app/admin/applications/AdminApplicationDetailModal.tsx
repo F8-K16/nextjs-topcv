@@ -10,7 +10,7 @@ import {
   type AdminApplicationPreview,
 } from "@/services/admin-applications.service";
 import { getErrorToastMessage } from "@/lib/submit-error";
-import { adminBorderSubtle } from "@/lib/admin-ui";
+import { adminBorderSubtle, adminDialogSurface } from "@/lib/admin-ui";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -48,8 +48,8 @@ function PreviewBody({ data }: { data: AdminApplicationPreview }) {
             </p>
           </div>
         ) : data.resume.kind === "template" ? (
-          <div className="overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 shadow-inner dark:border-[#2a2a2a] dark:bg-[#252525]">
-            <p className="border-b border-zinc-200 bg-zinc-100 px-3 py-2 text-xs font-medium text-zinc-600 dark:border-[#2a2a2a] dark:bg-[#1e1e1e] dark:text-zinc-400">
+          <div className="overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 shadow-inner dark:border-white/10 dark:bg-zinc-800/50">
+            <p className="border-b border-zinc-200 bg-zinc-100 px-3 py-2 text-xs font-medium text-zinc-600 dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-400">
               {data.resume.title}
             </p>
             <div className="max-h-[min(55vh,560px)] overflow-y-auto p-3 custom-scrollbar">
@@ -61,8 +61,8 @@ function PreviewBody({ data }: { data: AdminApplicationPreview }) {
             </div>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50/90 shadow-inner dark:border-[#2a2a2a] dark:bg-[#252525]/80">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-200 bg-zinc-100 px-3 py-2 dark:border-[#2a2a2a] dark:bg-[#1e1e1e]">
+          <div className="overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50/90 shadow-inner dark:border-white/10 dark:bg-zinc-800/50">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-200 bg-zinc-100 px-3 py-2 dark:border-white/10 dark:bg-zinc-900">
               <p className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
                 {data.resume.title} · Xem nhanh file
               </p>
@@ -134,8 +134,8 @@ export default function AdminApplicationDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[90vh] max-w-[min(100vw-2rem,56rem)] flex-col gap-0 overflow-hidden border border-zinc-200 bg-white p-0 text-zinc-900 sm:max-w-3xl dark:border-[#2a2a2a] dark:bg-[#1e1e1e] dark:text-white">
-        <div className="border-b border-zinc-200 bg-gradient-to-r from-violet-600/10 to-transparent p-4 pr-14 dark:border-[#2a2a2a] dark:from-violet-600/15">
+      <DialogContent className={cn("flex max-h-[90vh] max-w-[min(100vw-2rem,56rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-3xl border", adminDialogSurface)}>
+        <div className="border-b border-zinc-200 bg-gradient-to-r from-violet-600/10 to-transparent p-4 pr-14 dark:border-white/10 dark:from-violet-600/15">
           <DialogHeader className="gap-1 text-left">
             <DialogTitle className="text-zinc-900 dark:text-white">
               Hồ sơ ứng tuyển
@@ -183,7 +183,7 @@ export default function AdminApplicationDetailModal({
 
         <div
           className={cn(
-            "flex flex-wrap items-center justify-end gap-2 border-t bg-zinc-50 px-4 py-3 dark:bg-[#181818]",
+            "flex flex-wrap items-center justify-end gap-2 border-t bg-zinc-50 px-4 py-3 dark:bg-zinc-950/50",
             adminBorderSubtle,
             "dark:border-[#2a2a2a]",
           )}

@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell, BellOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { useAuthStore } from "@/app/stores/auth.store";
-import { useModalStore } from "@/app/stores/modal.store";
 import { STALE_COMPANY_FOLLOW_STATUS_MS } from "@/lib/query-stale-time";
 import { companyFollowService } from "@/services/company-follow.service";
 import { getErrorToastMessage } from "@/lib/submit-error";
@@ -21,7 +21,7 @@ export default function CompanyFollowButton({
   companyName,
 }: Props) {
   const { user, isAuthenticated } = useAuthStore();
-  const { openModal } = useModalStore();
+  const router = useRouter();
   const qc = useQueryClient();
   const [loading, setLoading] = useState(false);
 
@@ -87,7 +87,10 @@ export default function CompanyFollowButton({
     return (
       <button
         type="button"
-        onClick={() => openModal("login")}
+        onClick={() => {
+          const next = `${window.location.pathname}${window.location.search}`;
+          router.push(`/auth/login?redirect=${encodeURIComponent(next)}`);
+        }}
         className="inline-flex items-center gap-2 rounded-xl border border-white/40 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/20"
       >
         <Bell className="h-4 w-4" />

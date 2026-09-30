@@ -25,7 +25,7 @@ export function AdminThemeToggle() {
     return () => cancelAnimationFrame(id);
   }, []);
 
-  const iconClass = "h-6 w-6 sm:h-7 sm:w-7";
+  const iconClass = "h-[18px] w-[18px]";
 
   return (
     <DropdownMenu>
@@ -34,7 +34,7 @@ export function AdminThemeToggle() {
           type="button"
           variant="ghost"
           size="icon"
-          className="h-9 w-9 shrink-0 rounded-xl text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 aria-expanded:bg-zinc-200 aria-expanded:text-zinc-900 dark:text-zinc-200 dark:hover:bg-white/10 dark:hover:text-white dark:aria-expanded:bg-zinc-800! dark:aria-expanded:text-white! dark:data-[state=open]:bg-zinc-800! dark:data-[state=open]:text-white! sm:h-10 sm:w-10"
+          className="h-9 w-9 shrink-0 rounded-lg text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 aria-expanded:bg-zinc-200 aria-expanded:text-zinc-900 dark:text-zinc-200 dark:hover:bg-white/10 dark:hover:text-white dark:aria-expanded:bg-zinc-800! dark:aria-expanded:text-white! dark:data-[state=open]:bg-zinc-800! dark:data-[state=open]:text-white!"
           aria-label="Giao diện sáng hoặc tối"
         >
           {!mounted ? (

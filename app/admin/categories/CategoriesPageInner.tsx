@@ -23,12 +23,14 @@ import {
   adminSearchFieldGrow,
   adminSearchFieldWide,
   adminSurfaceCardBlur,
+  adminTable,
   adminTableDivide,
   adminTableEmptyCell,
   adminTableHeadRow,
   adminTableMuted,
 } from "@/lib/admin-ui";
 import { getErrorToastMessage } from "@/lib/submit-error";
+import { notifyPublicCatalogChanged, useMetadataStore } from "@/app/stores/metadata.store";
 
 function slugify(str: string) {
   return str
@@ -116,7 +118,9 @@ export function CategoriesPageInner() {
   const invalidateAll = async () => {
     await Promise.all([
       qc.invalidateQueries({ queryKey: ["admin", "categories"] }),
+      useMetadataStore.getState().fetchMeta({ force: true }),
     ]);
+    notifyPublicCatalogChanged();
   };
 
   const createParentMut = useMutation({
@@ -343,7 +347,7 @@ export function CategoriesPageInner() {
           </div>
 
           <div className="mt-4 overflow-x-auto">
-            <table className={cn("min-w-full", adminTableDivide)}>
+            <table className={cn(adminTable, adminTableDivide)}>
               <thead>
                 <tr className={adminTableHeadRow}>
                   <th className="px-3 py-2">Tên</th>
@@ -372,25 +376,28 @@ export function CategoriesPageInner() {
                     return (
                       <tr
                         key={row.id}
-                        className={cn(selected && adminRowSelected)}
+                        onClick={() => setSelectedParentIdInput(row.id)}
+                        className={cn(
+                          "cursor-pointer transition-colors",
+                          selected
+                            ? adminRowSelected
+                            : "hover:bg-zinc-50 dark:hover:bg-white/[0.04]",
+                        )}
                       >
                         <td className="px-3 py-2">
                           {isEditing ? (
                             <input
                               value={editingParentName}
+                              onClick={(e) => e.stopPropagation()}
                               onChange={(e) =>
                                 setEditingParentName(e.target.value)
                               }
                               className={adminInputCompact}
                             />
                           ) : (
-                            <button
-                              type="button"
-                              onClick={() => setSelectedParentIdInput(row.id)}
-                              className="text-left text-sm font-semibold text-zinc-900 hover:underline dark:text-white"
-                            >
+                            <span className="text-sm font-semibold text-zinc-900 dark:text-white">
                               {row.name}
-                            </button>
+                            </span>
                           )}
                         </td>
                         <td className={cn("px-3 py-2", adminTableMuted)}>
@@ -400,7 +407,10 @@ export function CategoriesPageInner() {
                           {row._count?.categories ?? 0}
                         </td>
                         <td className="px-3 py-2">
-                          <div className="flex items-center gap-2">
+                          <div
+                            className="flex items-center gap-2"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             {isEditing ? (
                               <>
                                 <button
@@ -490,7 +500,7 @@ export function CategoriesPageInner() {
           </div>
 
           <div className="mt-4 overflow-x-auto">
-            <table className={cn("min-w-full", adminTableDivide)}>
+            <table className={cn(adminTable, adminTableDivide)}>
               <thead>
                 <tr className={adminTableHeadRow}>
                   <th className="px-3 py-2">Tên</th>

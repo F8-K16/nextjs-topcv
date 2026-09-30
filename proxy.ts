@@ -39,6 +39,29 @@ export default function proxy(request: NextRequest) {
     }
   }
 
+  const isStaff = Boolean(
+    payload?.roles?.some((r) => ["ADMIN", "MODERATOR", "SUPPORT"].includes(r)),
+  );
+  const isEmployerRole = Boolean(payload?.roles?.includes("EMPLOYER"));
+
+  if (pathname === "/profile" || pathname.startsWith("/profile/password")) {
+    if (!token) {
+      return loginRedirect(request);
+    }
+    if (isStaff) {
+      const dest = pathname.startsWith("/profile/password")
+        ? "/admin/profile/password"
+        : "/admin/profile";
+      return NextResponse.redirect(new URL(dest, request.nextUrl.origin));
+    }
+    if (isEmployerRole) {
+      const dest = pathname.startsWith("/profile/password")
+        ? "/employer/profile/password"
+        : "/employer/profile";
+      return NextResponse.redirect(new URL(dest, request.nextUrl.origin));
+    }
+  }
+
   if (pathname.startsWith("/employer")) {
     if (!token) {
       return loginRedirect(request);
@@ -86,8 +109,10 @@ export default function proxy(request: NextRequest) {
   }
 
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
+  const isServerAction = request.headers.has("next-action");
+  const isRscRequest = request.headers.get("rsc") === "1";
 
-  if (isAuthRoute && token) {
+  if (isAuthRoute && token && !isServerAction && !isRscRequest) {
     return NextResponse.redirect(new URL("/", request.nextUrl.origin));
   }
 

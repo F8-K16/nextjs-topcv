@@ -21,6 +21,7 @@ import type {
   AccessControlRoleListItem,
 } from "@/app/types/access-control.type";
 import { AdminConfirmDialog } from "@/components/admin/admin-confirm-dialog";
+import { AdminStatusChip } from "@/components/admin/admin-status-chip";
 import AdminPagination from "@/components/admin/AdminPagination";
 import RoleFormModal from "./RoleFormModal";
 import { cn } from "@/lib/utils";
@@ -28,12 +29,20 @@ import {
   ADMIN_ADD_NEW_BUTTON,
   ADMIN_NATIVE_OPTION,
   ADMIN_NATIVE_SELECT,
+  ADMIN_SEARCH_ICON,
+  ADMIN_SEARCH_WRAP,
   adminSearchFieldWithIcon,
   adminSurfaceCardBlur,
+  adminTable,
   adminTableDivide,
   adminTableEmptyCell,
   adminTableHeadRow,
 } from "@/lib/admin-ui";
+import {
+  AdminPageHeader,
+  AdminToolbar,
+  AdminToolbarRow,
+} from "@/components/admin/admin-page-header";
 import { STALE_ADMIN_ACCESS_CONTROL_MS } from "@/lib/query-stale-time";
 import { getErrorToastMessage } from "@/lib/submit-error";
 
@@ -119,15 +128,10 @@ export default function AccessControlPageInner() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-white">
-          Phân quyền
-        </h1>
-        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-500">
-          Quản lý vai trò và quyền hạn của hệ thống. Cập nhật vai trò sẽ tự động
-          làm mới cache quyền của các tài khoản liên quan.
-        </p>
-      </div>
+      <AdminPageHeader
+        title="Phân quyền"
+        description="Quản lý vai trò và quyền hạn. Cập nhật vai trò sẽ làm mới cache quyền của tài khoản liên quan."
+      />
 
       <div className="flex flex-wrap items-center gap-2">
         {TABS.map((t) => (
@@ -136,7 +140,7 @@ export default function AccessControlPageInner() {
             type="button"
             onClick={() => pushQuery({ tab: t.id, page: "" })}
             className={cn(
-              "rounded-lg border px-4 py-2 text-sm font-medium transition",
+              "inline-flex h-9 items-center rounded-lg border px-3 text-[12px] font-medium transition",
               tab === t.id
                 ? "border-violet-300 bg-violet-100 text-violet-800 dark:border-violet-400/40 dark:bg-violet-500/15 dark:text-violet-200"
                 : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 dark:border-white/10 dark:bg-white/[0.03] dark:text-zinc-200 dark:hover:bg-white/[0.06]",
@@ -239,14 +243,10 @@ function RolesPanel({
 }) {
   return (
     <>
-      <div
-        className={cn(
-          adminSurfaceCardBlur,
-          "flex flex-col gap-3 p-4 sm:flex-row sm:items-center",
-        )}
-      >
-        <div className="relative min-w-[200px] flex-1">
-          <Search className="pointer-events-none absolute left-4 top-3 h-4 w-4 text-zinc-400 dark:text-zinc-500" />
+      <AdminToolbar>
+        <AdminToolbarRow>
+        <div className={ADMIN_SEARCH_WRAP}>
+          <Search className={ADMIN_SEARCH_ICON} />
           <input
             defaultValue={search}
             placeholder="Tìm theo tên vai trò..."
@@ -264,7 +264,7 @@ function RolesPanel({
           className={ADMIN_NATIVE_SELECT}
         >
           <option value="" className={ADMIN_NATIVE_OPTION}>
-            Tất cả trạng thái
+            Trạng thái
           </option>
           <option value="true" className={ADMIN_NATIVE_OPTION}>
             Đang hoạt động
@@ -278,10 +278,11 @@ function RolesPanel({
           onClick={onCreate}
           className={ADMIN_ADD_NEW_BUTTON}
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-3.5 w-3.5" />
           Vai trò mới
         </button>
-      </div>
+        </AdminToolbarRow>
+      </AdminToolbar>
 
       {isLoading ? (
         <div className="h-40 animate-pulse rounded-2xl bg-zinc-100 dark:bg-white/[0.06]" />
@@ -302,7 +303,7 @@ function RolesPanel({
           animate={{ opacity: 1, y: 0 }}
           className={cn(adminSurfaceCardBlur, "overflow-hidden p-0 shadow-xl")}
         >
-          <table className={cn("min-w-full text-sm", adminTableDivide)}>
+          <table className={cn(adminTable, adminTableDivide)}>
             <thead>
               <tr className={cn(adminTableHeadRow, "uppercase tracking-wide")}>
                 <th className="px-4 py-3">Tên</th>
@@ -351,16 +352,9 @@ function RolesPanel({
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <span
-                        className={cn(
-                          "rounded-full px-2 py-0.5 text-xs font-medium",
-                          r.status
-                            ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300"
-                            : "bg-zinc-100 text-zinc-600 dark:bg-white/10 dark:text-zinc-300",
-                        )}
-                      >
-                        {r.status ? "Hoạt động" : "Đã tắt"}
-                      </span>
+                      <AdminStatusChip tone={r.status ? "success" : "neutral"}>
+                        {r.status ? "Bật" : "Tắt"}
+                      </AdminStatusChip>
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex justify-end gap-2">
@@ -462,14 +456,10 @@ function PermissionsPanel({
 
   return (
     <>
-      <div
-        className={cn(
-          adminSurfaceCardBlur,
-          "flex flex-col gap-3 p-4 sm:flex-row sm:items-center",
-        )}
-      >
-        <div className="relative min-w-[200px] flex-1">
-          <Search className="pointer-events-none absolute left-4 top-3 h-4 w-4 text-zinc-400 dark:text-zinc-500" />
+      <AdminToolbar>
+        <AdminToolbarRow>
+        <div className={cn(ADMIN_SEARCH_WRAP, "sm:max-w-md")}>
+          <Search className={ADMIN_SEARCH_ICON} />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -480,7 +470,8 @@ function PermissionsPanel({
         <span className="text-xs text-zinc-500 dark:text-zinc-400">
           Tổng cộng {total} quyền
         </span>
-      </div>
+        </AdminToolbarRow>
+      </AdminToolbar>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filtered.length === 0 ? (

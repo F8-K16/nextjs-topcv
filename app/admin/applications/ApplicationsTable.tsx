@@ -14,12 +14,21 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
   ADMIN_NATIVE_SELECT,
+  ADMIN_PAGE_STACK,
+  ADMIN_SEARCH_ICON,
+  ADMIN_SEARCH_WRAP,
   adminSearchFieldWithIcon,
   adminSurfaceCardBlur,
+  adminTable,
   adminTableDivide,
   adminTableHeadRow,
 } from "@/lib/admin-ui";
 import AdminPagination from "@/components/admin/AdminPagination";
+import {
+  AdminPageHeader,
+  AdminToolbar,
+  AdminToolbarRow,
+} from "@/components/admin/admin-page-header";
 import { getErrorToastMessage } from "@/lib/submit-error";
 import AdminApplicationDetailModal from "./AdminApplicationDetailModal";
 
@@ -52,7 +61,7 @@ type ListPayload = {
 };
 
 const STATUS_OPTIONS: { value: string; label: string }[] = [
-  { value: "", label: "Tất cả trạng thái" },
+  { value: "", label: "Trạng thái" },
   { value: "PENDING", label: "Chờ xử lý" },
   { value: "REVIEWED", label: "Đã xem" },
   { value: "ACCEPTED", label: "Đạt" },
@@ -133,13 +142,14 @@ export default function ApplicationsTable() {
   const pagination = data?.pagination;
 
   return (
-    <div>
-      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <h2 className="text-xl font-semibold text-zinc-900 dark:text-white">
-          Đơn ứng tuyển
-        </h2>
-        <div className="flex flex-wrap gap-3">
-          <div className="relative min-w-80 flex-1">
+    <div className={ADMIN_PAGE_STACK}>
+      <AdminPageHeader
+        title="Đơn ứng tuyển"
+        description="Theo dõi hồ sơ ứng tuyển trên toàn hệ thống."
+      />
+      <AdminToolbar>
+        <AdminToolbarRow>
+          <div className={cn(ADMIN_SEARCH_WRAP, "sm:max-w-sm")}>
             <input
               type="text"
               placeholder="Email, tên ứng viên, tiêu đề công việc…"
@@ -151,10 +161,7 @@ export default function ApplicationsTable() {
               }}
               className={adminSearchFieldWithIcon}
             />
-            <Search
-              className="pointer-events-none absolute left-3 top-2.5 text-zinc-400 dark:text-zinc-500"
-              size={18}
-            />
+            <Search className={ADMIN_SEARCH_ICON} />
           </div>
           <select
             className={ADMIN_NATIVE_SELECT}
@@ -167,12 +174,12 @@ export default function ApplicationsTable() {
               </option>
             ))}
           </select>
-        </div>
-      </div>
+        </AdminToolbarRow>
+      </AdminToolbar>
 
       <div className={cn(adminSurfaceCardBlur, "overflow-hidden p-0")}>
         <div className="overflow-x-auto">
-          <table className={cn("min-w-full text-sm", adminTableDivide)}>
+          <table className={cn(adminTable, adminTableDivide)}>
             <thead>
               <tr className={cn(adminTableHeadRow, "uppercase")}>
                 <th className="px-4 py-3">Ứng viên</th>
@@ -241,7 +248,10 @@ export default function ApplicationsTable() {
                   </td>
                   <td className="px-4 py-3">
                     <select
-                      className={`${ADMIN_NATIVE_SELECT} text-xs`}
+                      className={cn(
+                        ADMIN_NATIVE_SELECT,
+                        "h-7 min-w-0 max-w-[6.75rem] px-1.5 py-0 text-[10px]",
+                      )}
                       value={row.status}
                       onChange={(e) =>
                         onStatusChange(
@@ -250,7 +260,7 @@ export default function ApplicationsTable() {
                         )
                       }
                     >
-                      <option value="PENDING">Chờ xử lý</option>
+                      <option value="PENDING">Chờ</option>
                       <option value="REVIEWED">Đã xem</option>
                       <option value="ACCEPTED">Đạt</option>
                       <option value="REJECTED">Loại</option>

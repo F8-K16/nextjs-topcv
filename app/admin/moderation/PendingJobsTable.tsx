@@ -13,6 +13,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useModal } from "../components/ModalManager";
 import { useAuthStore } from "@/app/stores/auth.store";
+import { canAdminPermission } from "@/lib/rbac";
 import {
   adminModerationBtnApprove,
   adminModerationBtnGhost,
@@ -28,9 +29,12 @@ export default function PendingJobsTable({ jobs }: { jobs: Job[] }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { openModal } = useModal();
+  const roles = useAuthStore((s) => s.user?.roles ?? []);
   const permissions = useAuthStore((s) => s.user?.permissions ?? []);
-  const canApprove = permissions.includes("admin:jobs:approve");
-  const canReject = permissions.includes("admin:jobs:reject");
+  const canApprove = canAdminPermission(roles, permissions, "admin:jobs:approve");
+  const canReject =
+    canAdminPermission(roles, permissions, "admin:jobs:reject") ||
+    canAdminPermission(roles, permissions, "admin:jobs:approve");
   const [confirmBulkApprove, setConfirmBulkApprove] = useState(false);
   const [bulkApproveLoading, setBulkApproveLoading] = useState(false);
 

@@ -28,7 +28,14 @@ function toDisplayableAvatarUrl(
     if (u.protocol !== "https:" && u.protocol !== "http:") {
       return undefined;
     }
-    if (u.hostname === "res.cloudinary.com" && u.protocol === "https:") {
+    const host = u.hostname.toLowerCase();
+    const isCloudinary =
+      host === "res.cloudinary.com" && u.protocol === "https:";
+    const isGoogleAvatar =
+      u.protocol === "https:" &&
+      (host === "googleusercontent.com" ||
+        host.endsWith(".googleusercontent.com"));
+    if (isCloudinary || isGoogleAvatar) {
       return t;
     }
     return undefined;

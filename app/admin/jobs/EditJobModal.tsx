@@ -28,7 +28,8 @@ import { categoryService } from "@/services/category.service";
 import { employerService } from "@/services/employer.service";
 import { formatCurrency, parseCurrency } from "@/utils/helper";
 import { adminSkillsService } from "@/services/admin-skills.service";
-import { ADMIN_MODAL_SELECT } from "@/lib/admin-ui";
+import { ADMIN_MODAL_SELECT, adminChipActive, adminChipIdle, adminDialogSurface, adminInput, adminLabel, adminPickerBox, adminPickerBoxLg } from "@/lib/admin-ui";
+import { cn } from "@/lib/utils";
 import {
   applyFieldErrorsToForm,
   getErrorToastMessage,
@@ -90,7 +91,7 @@ export default function EditJobModal({
   const skillIdsSelected = (useWatch({ control, name: "skillIds" }) ??
     []) as number[];
 
-  const inputClass = ADMIN_MODAL_SELECT;
+  const inputClass = adminInput;
 
   useEffect(() => {
     if (!job) return;
@@ -249,7 +250,7 @@ export default function EditJobModal({
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="bg-[#1e1e1e] text-white border border-gray-700 min-w-3xl max-h-[min(92vh,900px)] overflow-y-auto">
+      <DialogContent className={cn("min-w-3xl max-h-[min(92vh,900px)] overflow-y-auto border", adminDialogSurface)}>
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">
             Chỉnh sửa việc làm
@@ -258,7 +259,7 @@ export default function EditJobModal({
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 mt-3">
           <div>
-            <label className="mb-1 block text-sm text-gray-300">Tiêu đề</label>
+            <label className={adminLabel}>Tiêu đề</label>
             <input
               {...register("title")}
               className={inputClass}
@@ -272,7 +273,7 @@ export default function EditJobModal({
           </div>
 
           <div>
-            <label className="mb-1 block text-sm text-gray-300">Mô tả</label>
+            <label className={adminLabel}>Mô tả</label>
             <textarea
               rows={5}
               {...register("description")}
@@ -282,7 +283,7 @@ export default function EditJobModal({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1 block text-sm text-gray-300">
+              <label className={adminLabel}>
                 Công ty
               </label>
               <select
@@ -301,7 +302,7 @@ export default function EditJobModal({
             </div>
 
             <div>
-              <label className="text-sm text-gray-300 mb-1 block">
+              <label className={adminLabel}>
                 Nhà tuyển dụng
               </label>
 
@@ -332,13 +333,13 @@ export default function EditJobModal({
           </div>
 
           <div>
-            <label className="mb-1 block text-sm text-gray-300">Danh mục</label>
+            <label className={adminLabel}>Danh mục</label>
             {!selectedCompanyId ? (
-              <p className="text-sm text-gray-500">
+              <p className="text-[13px] text-zinc-500 dark:text-zinc-400">
                 Chọn công ty để xem danh mục.
               </p>
             ) : loadingCategory ? (
-              <p className="text-sm text-gray-500">Đang tải danh mục…</p>
+              <p className="text-[13px] text-zinc-500 dark:text-zinc-400">Đang tải danh mục…</p>
             ) : companyCategories.length === 0 ? (
               <p className="text-sm text-amber-400/90">
                 Công ty chưa gán danh mục nào.
@@ -348,7 +349,7 @@ export default function EditJobModal({
                 control={control}
                 name="categoryId"
                 render={({ field }) => (
-                  <div className="max-h-40 overflow-y-auto overscroll-y-contain rounded-md border border-gray-600/60 bg-[#2a2a2a] p-2 pr-1.5 [scrollbar-gutter:stable]">
+                  <div className={adminPickerBox}>
                     <div className="grid grid-cols-1 min-[500px]:grid-cols-2 min-[800px]:grid-cols-3 gap-1.5">
                       {companyCategories.map((item) => {
                         const on = field.value === item.id;
@@ -359,11 +360,7 @@ export default function EditJobModal({
                             onClick={() =>
                               field.onChange(on ? undefined : item.id)
                             }
-                            className={`rounded-md border px-2 py-1.5 text-left text-sm transition ${
-                              on
-                                ? "border-violet-500 bg-violet-600/30 text-white"
-                                : "border-gray-600 text-gray-300 hover:bg-gray-700/60"
-                            }`}
+                            className={on ? adminChipActive : adminChipIdle}
                           >
                             {item.name}
                           </button>
@@ -381,7 +378,7 @@ export default function EditJobModal({
             )}
           </div>
 
-          <label className="block text-sm mb-1 text-gray-400">Mức lương</label>
+          <label className={adminLabel}>Mức lương</label>
           <div className="grid grid-cols-2 gap-4">
             <Controller
               control={control}
@@ -426,10 +423,10 @@ export default function EditJobModal({
           )}
 
           <div className="grid grid-cols-2 gap-4 mb-0">
-            <label className="block text-sm mb-1 text-gray-400">
+            <label className={adminLabel}>
               Hình thức
             </label>
-            <label className="block text-sm mb-1 text-gray-400">Cấp bậc</label>
+            <label className={adminLabel}>Cấp bậc</label>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <select {...register("jobType")} className={inputClass}>
@@ -449,7 +446,7 @@ export default function EditJobModal({
             </select>
           </div>
 
-          <label className="block text-sm mb-1 text-gray-400">
+          <label className={adminLabel}>
             Số lượng cần tuyển
           </label>
           <input
@@ -460,10 +457,10 @@ export default function EditJobModal({
           />
 
           <div>
-            <label className="mb-1 block text-sm text-gray-300">
+            <label className={adminLabel}>
               Trạng thái duyệt
             </label>
-            <select {...register("moderationStatus")} className={inputClass}>
+            <select {...register("moderationStatus")} className={ADMIN_MODAL_SELECT}>
               {JOB_MODERATION_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
                   {o.label}
@@ -473,7 +470,7 @@ export default function EditJobModal({
           </div>
 
           <div>
-            <label className="mb-1 block text-sm text-gray-300">
+            <label className={adminLabel}>
               Hạn nộp hồ sơ
             </label>
             <input
@@ -484,7 +481,7 @@ export default function EditJobModal({
           </div>
 
           <div>
-            <label className="mb-1 block text-sm text-gray-300">
+            <label className={adminLabel}>
               Địa điểm làm việc
             </label>
             <input
@@ -494,7 +491,7 @@ export default function EditJobModal({
             />
           </div>
 
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-300">
+          <label className="flex cursor-pointer items-center gap-2 text-[13px] text-zinc-700 dark:text-zinc-300">
             <input
               type="checkbox"
               {...register("isFeatured")}
@@ -504,13 +501,13 @@ export default function EditJobModal({
           </label>
 
           <div>
-            <label className="mb-1 block text-sm text-gray-300">Kỹ năng</label>
-            <p className="text-xs text-gray-500 mb-1.5">
+            <label className={adminLabel}>Kỹ năng</label>
+            <p className="mb-1.5 text-xs text-zinc-500 dark:text-zinc-400">
               Chọn các kỹ năng cần có của công việc.
             </p>
-            <div className="max-h-48 overflow-y-auto overscroll-y-contain rounded-md border border-gray-600/60 bg-[#2a2a2a] p-2 pr-1.5 [scrollbar-gutter:stable]">
+            <div className={adminPickerBoxLg}>
               {skillOptions.length === 0 ? (
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
                   Đang tải hoặc chưa có kỹ năng
                 </p>
               ) : (

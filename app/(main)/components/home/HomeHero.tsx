@@ -21,6 +21,7 @@ import { useAuthStore } from "@/app/stores/auth.store";
 import { useFixedDropdownPlacement } from "@/hooks/use-fixed-dropdown-placement";
 import { useDebounce } from "@/hooks/use-debounce";
 import { jobService } from "@/services/job.service";
+import { usePublicFeatures } from "@/hooks/usePublicFeatures";
 
 import HeroLocationCombobox from "./HeroLocationCombobox";
 
@@ -28,14 +29,12 @@ const CATEGORY_PAGE_SIZE = 10;
 
 export default function HomeHero() {
   const { data } = useMetadataStore();
+  const fetchMeta = useMetadataStore((s) => s.fetchMeta);
+  const { opensearch } = usePublicFeatures();
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const isCandidate = Boolean(user?.roles?.includes("CANDIDATE"));
-  const showEmployerRecruitCta = !isCandidate;
-  const employerRecruitHref = !isAuthenticated
-    ? "/auth/login?redirect=/employer"
-    : "/employer";
+  const isEmployer = Boolean(user?.roles?.includes("EMPLOYER"));
   const {
     provinces,
     districtsMap,
@@ -67,6 +66,10 @@ export default function HomeHero() {
   );
 
   useEffect(() => {
+    void fetchMeta({ force: true });
+  }, [fetchMeta]);
+
+  useEffect(() => {
     fetchProvinces();
   }, [fetchProvinces]);
 
@@ -95,7 +98,7 @@ export default function HomeHero() {
   const { data: suggestData, isFetching: isSuggestLoading } = useQuery({
     queryKey: ["jobs-suggest", trimmedDebounced],
     queryFn: () => jobService.suggestJobs(trimmedDebounced),
-    enabled: trimmedDebounced.length >= 2 && isSuggestOpen,
+    enabled: opensearch && trimmedDebounced.length >= 2 && isSuggestOpen,
     gcTime: 60_000,
     staleTime: 10_000,
     retry: 0,
@@ -218,15 +221,20 @@ export default function HomeHero() {
               Tìm việc ngay
               <ArrowRight className="h-4 w-4 shrink-0" />
             </Link>
-            {showEmployerRecruitCta ? (
-              <Link
-                href={employerRecruitHref}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm font-semibold backdrop-blur transition hover:bg-white/10 sm:px-5 sm:py-3 sm:w-auto"
-              >
-                <Building2 className="h-4 w-4 shrink-0" />
-                Đăng tuyển dụng
-              </Link>
-            ) : null}
+            <button
+              type="button"
+              onClick={() => {
+                if (isAuthenticated && isEmployer) {
+                  router.push("/employer");
+                  return;
+                }
+                router.push("/auth/sign-up/employer");
+              }}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm font-semibold backdrop-blur transition hover:bg-white/10 sm:w-auto sm:px-5 sm:py-3"
+            >
+              <Building2 className="h-4 w-4 shrink-0" />
+              Đăng tuyển dụng
+            </button>
           </div>
         </motion.div>
 
@@ -244,7 +252,9 @@ export default function HomeHero() {
               <input
                 value={search}
                 onChange={(e) => handleSearchInputChange(e.target.value)}
-                onFocus={() => setIsSuggestOpen(true)}
+                onFocus={() => {
+                  if (opensearch) setIsSuggestOpen(true);
+                }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
@@ -258,7 +268,8 @@ export default function HomeHero() {
                 placeholder="Chức danh, kỹ năng, tên công ty..."
                 className="w-full border-0 bg-transparent px-3.5 py-3.5 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 sm:px-4 sm:py-4 md:px-5 md:text-base"
               />
-              {isSuggestOpen &&
+              {opensearch &&
+                isSuggestOpen &&
                 trimmedDebounced.length >= 2 &&
                 typeof document !== "undefined" &&
                 suggestPanelStyle &&

@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { MoreHorizontal, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import { invalidateEmployerPortalJobQueries } from "@/lib/employer-portal-queries";
@@ -22,6 +22,14 @@ import {
 } from "@/lib/query-stale-time";
 import { useAuthStore } from "@/app/stores/auth.store";
 import { requestAppConfirm } from "@/app/stores/confirm-dialog.store";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import OptionSelect from "@/components/ui/option-select";
+import { formatSalaryShort } from "@/utils/helper";
 
 const PAGE_SIZE = 12;
 
@@ -200,21 +208,18 @@ export default function EmployerJobsPageClient() {
             <label className="mb-1 block text-xs font-medium text-zinc-500">
               {"Trạng thái duyệt"}
             </label>
-            <select
+            <OptionSelect
+              ariaLabel="Trạng thái duyệt"
+              placeholder="Tất cả"
               value={moderationStatus}
-              onChange={(e) =>
+              options={JOB_MODERATION_OPTIONS}
+              onChange={(next) =>
                 setParams({
-                  moderationStatus: e.target.value || null,
+                  moderationStatus: next || null,
                   page: null,
                 })
               }
-              className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm scheme:light"
-            >
-              <option value="">{"Tất cả"}</option>
-              <option value="PENDING">{"Chờ duyệt"}</option>
-              <option value="APPROVED">{"Đã duyệt"}</option>
-              <option value="REJECTED">{"Từ chối"}</option>
-            </select>
+            />
           </div>
           <div className="flex flex-wrap items-end gap-2">
             <button
@@ -227,77 +232,88 @@ export default function EmployerJobsPageClient() {
         </form>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-zinc-200 bg-white shadow-sm">
-        <table className="min-w-full text-left text-sm">
-          <thead className="sticky top-0 z-10 border-b border-zinc-200 bg-zinc-50 text-xs font-semibold uppercase text-zinc-500">
-            <tr>
-              <th className="px-4 py-3">{"Tiêu đề"}</th>
-              <th className="px-4 py-3">{"Danh mục"}</th>
-              <th className="px-4 py-3">{"Duyệt"}</th>
-              <th className="px-4 py-3">{"Ứng tuyển"}</th>
-              <th className="px-4 py-3">{"Lượt xem"}</th>
-              <th className="px-4 py-3 text-right">{"Thao tác"}</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-100">
+      <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+        {data.jobs.length === 0 ? (
+          <div className="px-4 py-14 text-center">
+            <p className="text-sm font-medium text-zinc-800">Chưa có tin tuyển dụng</p>
+            <p className="mt-1 text-sm text-zinc-500">
+              Đăng tin đầu tiên để bắt đầu nhận hồ sơ.
+            </p>
+          </div>
+        ) : (
+          <ul className="divide-y divide-zinc-100">
             {data.jobs.map((row) => {
               const job = row as {
                 id: number;
                 title: string;
                 viewCount?: number;
+                minSalary?: number;
+                maxSalary?: number;
+                workLocation?: string | null;
                 moderationStatus: string;
                 category?: { name: string };
                 _count?: { applications: number };
               };
+              const meta = [
+                formatSalaryShort(job.minSalary, job.maxSalary),
+                job.workLocation,
+                job.category?.name,
+                `${job._count?.applications ?? 0} hồ sơ`,
+                `${job.viewCount ?? 0} lượt xem`,
+              ].filter(Boolean);
+
               return (
-                <tr key={job.id} className="hover:bg-zinc-50/80">
-                  <td className="px-4 py-3 font-medium text-zinc-900">
-                    {job.title}
-                  </td>
-                  <td className="px-4 py-3 text-zinc-600">
-                    {job.category?.name ?? "—"}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex rounded-md px-2 py-0.5 text-[11px] font-semibold ${modBadgeClass(job.moderationStatus)}`}
-                    >
-                      {modLabel(job.moderationStatus)}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-zinc-600">
-                    {job._count?.applications ?? 0}
-                  </td>
-                  <td className="px-4 py-3 tabular-nums text-zinc-600">
-                    {job.viewCount ?? 0}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex flex-wrap items-center justify-end gap-2">
-                      {companyLocked ? (
-                        <span className="text-sm text-zinc-400">{"Sửa"}</span>
-                      ) : (
-                        <Link
-                          href={`/employer/jobs/${job.id}/edit`}
-                          className="text-sm font-semibold text-primary hover:underline"
-                        >
-                          {"Sửa"}
-                        </Link>
-                      )}
-                      <button
-                        type="button"
-                        disabled={deleteMut.isPending || companyLocked}
-                        onClick={() => void onDelete(job.id, job.title)}
-                        className="inline-flex items-center gap-1 text-sm font-semibold text-red-600 hover:underline disabled:opacity-50"
+                <li
+                  key={job.id}
+                  className="flex items-center gap-3 px-4 py-3.5 hover:bg-zinc-50/80"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="truncate font-semibold text-zinc-900">
+                        {job.title}
+                      </p>
+                      <span
+                        className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${modBadgeClass(job.moderationStatus)}`}
                       >
-                        <Trash2 className="h-3.5 w-3.5" />
-                        {"Xóa"}
-                      </button>
+                        {modLabel(job.moderationStatus)}
+                      </span>
                     </div>
-                  </td>
-                </tr>
+                    <p className="mt-1 truncate text-xs text-zinc-500">
+                      {meta.join(" · ")}
+                    </p>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger
+                      className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-zinc-500 hover:bg-zinc-100"
+                      aria-label={`Thao tác tin ${job.title}`}
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        disabled={companyLocked}
+                        onSelect={() => {
+                          if (!companyLocked) {
+                            router.push(`/employer/jobs/${job.id}/edit`);
+                          }
+                        }}
+                      >
+                        Sửa
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        disabled={deleteMut.isPending || companyLocked}
+                        className="text-red-600 focus:text-red-700"
+                        onSelect={() => void onDelete(job.id, job.title)}
+                      >
+                        Xóa
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </li>
               );
             })}
-          </tbody>
-        </table>
+          </ul>
+        )}
       </div>
 
       {total > 0 && (

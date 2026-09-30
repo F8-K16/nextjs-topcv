@@ -14,14 +14,22 @@ import { STALE_ADMIN_LOCATIONS_MS } from "@/lib/query-stale-time";
 import { getErrorToastMessage } from "@/lib/submit-error";
 import { cn } from "@/lib/utils";
 import {
+  ADMIN_ADD_NEW_BUTTON,
+  ADMIN_SEARCH_ICON,
+  ADMIN_SEARCH_WRAP,
   adminInputCompact,
   adminSearchField,
   adminSearchFieldGrow,
   adminSearchFieldWithIcon9,
   adminSurfaceCardBlur,
+  adminTable,
   adminTableDivide,
   adminTableHeadRow,
 } from "@/lib/admin-ui";
+import {
+  AdminPageHeader,
+  AdminToolbar,
+} from "@/components/admin/admin-page-header";
 
 const locEmeraldFocus =
   "focus:ring-emerald-500/40 dark:focus:ring-emerald-500/50";
@@ -251,29 +259,20 @@ export function LocationsPageInner() {
         }}
       />
 
-      <div>
-        <h1 className="flex items-center gap-2 text-2xl font-semibold text-zinc-900 dark:text-white">
-          Địa lý
-        </h1>
-        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-500">
-          Quản lý tỉnh/thành và quận/huyện dùng cho công ty, ứng viên và lọc
-          việc làm.
-        </p>
-      </div>
+      <AdminPageHeader
+        title="Địa lý"
+        description="Quản lý tỉnh/thành và quận/huyện dùng cho công ty, ứng viên và lọc việc làm."
+      />
 
       <div className="grid gap-8 xl:grid-cols-2">
         <div className="space-y-4">
-          <h2 className="text-lg font-medium text-zinc-900 dark:text-white">
+          <h2 className="text-sm font-semibold text-zinc-900 dark:text-white">
             Tỉnh / thành
           </h2>
-          <div
-            className={cn(
-              adminSurfaceCardBlur,
-              "flex flex-col gap-3 p-4 sm:flex-row sm:items-end",
-            )}
-          >
-            <div className="relative min-w-[200px] flex-1">
-              <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-zinc-400 dark:text-zinc-500" />
+          <AdminToolbar>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+            <div className={cn(ADMIN_SEARCH_WRAP, "sm:max-w-none")}>
+              <Search className={ADMIN_SEARCH_ICON} />
               <input
                 defaultValue={search}
                 placeholder="Tìm theo tên hoặc mã..."
@@ -314,19 +313,20 @@ export function LocationsPageInner() {
               type="button"
               disabled={!newProvinceName.trim() || createProvinceMut.isPending}
               onClick={() => createProvinceMut.mutate()}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-500 disabled:opacity-50"
+              className={ADMIN_ADD_NEW_BUTTON}
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-3.5 w-3.5" />
               Thêm tỉnh
             </button>
-          </div>
+            </div>
+          </AdminToolbar>
 
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             className={cn(adminSurfaceCardBlur, "overflow-hidden p-0 shadow-xl")}
           >
-            <table className={cn("min-w-full text-sm", adminTableDivide)}>
+            <table className={cn(adminTable, adminTableDivide)}>
               <thead>
                 <tr
                   className={cn(
@@ -456,7 +456,7 @@ export function LocationsPageInner() {
         </div>
 
         <div className="space-y-4">
-          <h2 className="text-lg font-medium text-zinc-900 dark:text-white">
+          <h2 className="text-sm font-semibold text-zinc-900 dark:text-white">
             Quận / huyện
             {districtData?.province ? (
               <span className="ml-2 font-normal text-zinc-500">
@@ -484,12 +484,8 @@ export function LocationsPageInner() {
             </div>
           ) : (
             <>
-              <div
-                className={cn(
-                  adminSurfaceCardBlur,
-                  "flex flex-col gap-3 p-4 sm:flex-row sm:items-center",
-                )}
-              >
+              <AdminToolbar>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                 <input
                   value={newDistrictName}
                   onChange={(e) => setNewDistrictName(e.target.value)}
@@ -502,12 +498,13 @@ export function LocationsPageInner() {
                     !newDistrictName.trim() || createDistrictMut.isPending
                   }
                   onClick={() => createDistrictMut.mutate()}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-500 disabled:opacity-50"
+                  className={ADMIN_ADD_NEW_BUTTON}
                 >
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-3.5 w-3.5" />
                   Thêm quận/huyện
                 </button>
-              </div>
+                </div>
+              </AdminToolbar>
 
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
@@ -517,7 +514,7 @@ export function LocationsPageInner() {
                   "overflow-hidden p-0 shadow-xl",
                 )}
               >
-                <table className={cn("min-w-full text-sm", adminTableDivide)}>
+                <table className={cn(adminTable, adminTableDivide)}>
                   <thead>
                     <tr
                       className={cn(

@@ -8,6 +8,8 @@ import { formatDate } from "@/utils/helper";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useAuthStore } from "@/app/stores/auth.store";
+import { getErrorToastMessage } from "@/lib/submit-error";
+import { canAdminPermission } from "@/lib/rbac";
 import { AdminConfirmDialog } from "@/components/admin/admin-confirm-dialog";
 import {
   Dialog,
@@ -37,9 +39,18 @@ type Props = {
 };
 
 export default function PendingEmployersTable({ data }: Props) {
+  const roles = useAuthStore((s) => s.user?.roles ?? []);
   const permissions = useAuthStore((s) => s.user?.permissions ?? []);
-  const canApprove = permissions.includes("admin:moderation:approve");
-  const canReject = permissions.includes("admin:moderation:reject");
+  const canApprove = canAdminPermission(
+    roles,
+    permissions,
+    "admin:moderation:approve",
+  );
+  const canReject = canAdminPermission(
+    roles,
+    permissions,
+    "admin:moderation:reject",
+  );
   const [rejectModal, setRejectModal] = useState<{
     open: boolean;
     employerId: number | null;
@@ -54,9 +65,13 @@ export default function PendingEmployersTable({ data }: Props) {
   const router = useRouter();
 
   const handleApprove = async (id: number) => {
-    await employerService.approve(id);
-    toast.success("Duyệt thành công");
-    router.refresh();
+    try {
+      await employerService.approve(id);
+      toast.success("Duyệt thành công");
+      router.refresh();
+    } catch (error) {
+      toast.error(getErrorToastMessage(error) || "Không duyệt được tài khoản");
+    }
   };
 
   const handleReject = async (id: number) => {
@@ -130,7 +145,7 @@ export default function PendingEmployersTable({ data }: Props) {
 
       <div className={adminModerationTableShell}>
         <div className="max-h-[min(28rem,70vh)] overflow-x-auto overflow-y-auto custom-scrollbar">
-          <table className="min-w-[720px] w-full border-collapse text-left text-sm">
+          <table className="admin-data-table min-w-[720px] w-full border-collapse text-left">
             <thead className={adminModerationThead}>
               <tr>
                 <th className={adminModerationTh}>Họ và tên</th>

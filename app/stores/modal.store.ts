@@ -1,6 +1,13 @@
 import { create } from "zustand";
 
-type ModalType = "login" | "apply" | "register" | "confirm" | "cv-draft" | null;
+type ModalType =
+  | "login"
+  | "employer-login"
+  | "register"
+  | "apply"
+  | "confirm"
+  | "cv-draft"
+  | null;
 
 export type ModalOpenData = Record<string, unknown> & {
   jobId?: number;

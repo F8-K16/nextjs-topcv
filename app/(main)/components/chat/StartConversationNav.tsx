@@ -1,12 +1,12 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { useChatBoxStore } from "@/app/stores/chatbox.store";
 import { chatService } from "@/services/chat.service";
 import { getErrorToastMessage } from "@/lib/submit-error";
 
@@ -17,16 +17,15 @@ type Props = {
 };
 
 /**
- * Mở thẳng /messages/:id — gọi API tạo cuộc trò chuyện nếu chưa tồn tại.
- * Tránh đi qua /messages?peerUserId=… (full page chuyển trung gian).
+ * Mở chatbox góc màn hình — tạo cuộc trò chuyện nếu chưa có.
  */
 export default function StartConversationNav({
   peerUserId,
   className,
   children,
 }: Props) {
-  const router = useRouter();
   const qc = useQueryClient();
+  const openConversation = useChatBoxStore((s) => s.openConversation);
   const [pending, setPending] = useState(false);
   const inFlight = useRef(false);
 
@@ -39,14 +38,14 @@ export default function StartConversationNav({
     try {
       const conv = await chatService.ensureConversation(peerUserId);
       void qc.invalidateQueries({ queryKey: ["chat-conversations"] });
-      router.push(`/messages/${conv.id}`);
+      openConversation(conv.id);
     } catch (e) {
       toast.error(getErrorToastMessage(e) || "Không mở được cuộc trò chuyện");
     } finally {
       inFlight.current = false;
       setPending(false);
     }
-  }, [peerUserId, qc, router]);
+  }, [peerUserId, qc, openConversation]);
 
   return (
     <button

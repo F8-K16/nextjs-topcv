@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { CompanyResponse } from "@/app/types/company.type";
 import { nextFetchCache } from "@/lib/next-fetch-cache";
 import { API_BASE_URL } from "@/lib/api-base-url";
+import { companyPublicPath } from "@/lib/company-path";
 
 export const COMPANIES_LIST_PAGE_SIZE = 12;
 
@@ -62,7 +63,7 @@ export default async function CompanySearchResult(props: Props) {
         {data.companies.map((c) => (
           <Link
             key={c.id}
-            href={`/companies/${c.id}`}
+            href={companyPublicPath(c)}
             className="group flex flex-col overflow-hidden rounded-2xl border border-zinc-200/90 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-md"
           >
             <div className="relative aspect-video w-full bg-zinc-50">

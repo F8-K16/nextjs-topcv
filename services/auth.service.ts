@@ -24,6 +24,9 @@ export const authService = {
       return {
         success: true,
         data: data as {
+          twoFactorRequired?: boolean;
+          twoFactorSetupRequired?: boolean;
+          challengeToken?: string;
           accessToken: string;
           refreshToken: string;
           user: import("@/app/stores/auth.store").User;
@@ -322,6 +325,32 @@ export const authService = {
       return { success: true, message: data?.message };
     } catch {
       return { success: false, message: "Không thể kết nối server" };
+    }
+  },
+
+  async verifyAdminTotp(input: { challengeToken: string; code: string }) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/2fa/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        return {
+          success: false as const,
+          message: data?.message || "Mã xác thực không đúng",
+        };
+      }
+      return {
+        success: true as const,
+        data: data as {
+          accessToken: string;
+          refreshToken: string;
+        },
+      };
+    } catch {
+      return { success: false as const, message: "Không thể kết nối server" };
     }
   },
 };

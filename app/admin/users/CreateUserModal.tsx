@@ -23,6 +23,8 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { ADMIN_MODAL_SELECT, adminDialogSurface, adminInput, adminLabel } from "@/lib/admin-ui";
+import { cn } from "@/lib/utils";
 
 type FormData = z.infer<typeof createUserSchema>;
 
@@ -68,7 +70,7 @@ export default function CreateUserModal({
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="border border-gray-700 bg-[#1e1e1e] text-white">
+      <DialogContent className={cn("border", adminDialogSurface)}>
         <DialogHeader>
           <DialogTitle>Tạo tài khoản</DialogTitle>
         </DialogHeader>
@@ -78,14 +80,14 @@ export default function CreateUserModal({
             <div>
               <label
                 htmlFor="create-user-username"
-                className="mb-1 block text-sm font-medium text-zinc-300"
+                className={adminLabel}
               >
                 Họ và tên
               </label>
               <input
                 id="create-user-username"
                 {...register("username")}
-                className="w-full rounded-lg border border-white/5 bg-[#2f2f2f] p-2.5 text-sm"
+                className={adminInput}
               />
               {errors.username && (
                 <p className="mt-1 text-sm text-red-400">
@@ -97,7 +99,7 @@ export default function CreateUserModal({
             <div>
               <label
                 htmlFor="create-user-email"
-                className="mb-1 block text-sm font-medium text-zinc-300"
+                className={adminLabel}
               >
                 Email
               </label>
@@ -106,7 +108,7 @@ export default function CreateUserModal({
                 type="email"
                 autoComplete="email"
                 {...register("email")}
-                className="w-full rounded-lg border border-white/5 bg-[#2f2f2f] p-2.5 text-sm"
+                className={adminInput}
               />
               {errors.email && (
                 <p className="mt-1 text-sm text-red-400">
@@ -118,7 +120,7 @@ export default function CreateUserModal({
             <div>
               <label
                 htmlFor="create-user-password"
-                className="mb-1 block text-sm font-medium text-zinc-300"
+                className={adminLabel}
               >
                 Mật khẩu
               </label>
@@ -127,7 +129,7 @@ export default function CreateUserModal({
                 type="password"
                 autoComplete="new-password"
                 {...register("password")}
-                className="w-full rounded-lg border border-white/5 bg-[#2f2f2f] p-2.5 text-sm"
+                className={adminInput}
               />
               {errors.password && (
                 <p className="mt-1 text-sm text-red-400">
@@ -139,7 +141,7 @@ export default function CreateUserModal({
             <div>
               <label
                 htmlFor="create-user-phone"
-                className="mb-1 block text-sm font-medium text-zinc-300"
+                className={adminLabel}
               >
                 Số điện thoại
               </label>
@@ -147,7 +149,7 @@ export default function CreateUserModal({
                 id="create-user-phone"
                 {...register("phone")}
                 placeholder="0xxxxxxxxx"
-                className="w-full rounded-lg border border-white/5 bg-[#2f2f2f] p-2.5 text-sm"
+                className={adminInput}
               />
               {errors.phone && (
                 <p className="mt-1 text-sm text-red-400">
@@ -159,13 +161,13 @@ export default function CreateUserModal({
             <div>
               <label
                 htmlFor="create-user-role"
-                className="mb-1 block text-sm font-medium text-zinc-300"
+                className={adminLabel}
               >
                 Vai trò
               </label>
               <select
                 id="create-user-role"
-                className="w-full rounded-lg border border-white/5 bg-[#2f2f2f] p-2.5 text-sm"
+                className={ADMIN_MODAL_SELECT}
                 onChange={(e) => setValue("roles", [Number(e.target.value)])}
                 defaultValue=""
               >

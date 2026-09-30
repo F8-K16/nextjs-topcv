@@ -22,6 +22,15 @@ import {
   getErrorToastMessage,
   resolveSubmitError,
 } from "@/lib/submit-error";
+import {
+  adminDialogSurface,
+  adminInput,
+  adminLabel,
+  adminPickerBox,
+  adminTagActive,
+  adminTagIdle,
+} from "@/lib/admin-ui";
+import { cn } from "@/lib/utils";
 
 type FormData = z.infer<typeof updateCompanySchema>;
 
@@ -134,19 +143,19 @@ export default function EditCompanyModal({
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="bg-[#1e1e1e] text-white border border-gray-700 min-w-2xl max-h-[min(90vh,720px)] overflow-y-auto">
+      <DialogContent className={cn("min-w-2xl max-h-[min(90vh,720px)] overflow-y-auto border", adminDialogSurface)}>
         <DialogHeader>
           <DialogTitle>Chỉnh sửa công ty</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
           <div>
-            <label className="block text-sm mb-1 text-gray-400">
+            <label className={adminLabel}>
               Tên công ty
             </label>
             <input
               {...register("name")}
-              className="w-full p-2 bg-[#2f2f2f] rounded"
+              className={adminInput}
             />
             {errors.name && (
               <p className="text-red-400 text-sm mt-1">{errors.name.message}</p>
@@ -154,10 +163,10 @@ export default function EditCompanyModal({
           </div>
 
           <div>
-            <label className="block text-sm mb-1 text-gray-400">Website</label>
+            <label className={adminLabel}>Website</label>
             <input
               {...register("website")}
-              className="w-full p-2 bg-[#2f2f2f] rounded"
+              className={adminInput}
             />
             {errors.website && (
               <p className="text-red-400 text-sm mt-1">
@@ -166,11 +175,11 @@ export default function EditCompanyModal({
             )}
           </div>
 
-          <label className="block text-sm mb-1 text-gray-400">Địa chỉ</label>
+          <label className={adminLabel}>Địa chỉ</label>
           <div>
             <input
               {...register("location")}
-              className="w-full p-2 bg-[#2f2f2f] rounded"
+              className={adminInput}
             />
             {errors.location && (
               <p className="text-red-400 text-sm mt-1">
@@ -181,14 +190,14 @@ export default function EditCompanyModal({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm mb-1 text-gray-400">
+              <label className={adminLabel}>
                 Tỉnh/Thành phố
               </label>
               <select
                 {...register("provinceId", {
                   setValueAs: (v) => (v ? Number(v) : undefined),
                 })}
-                className="w-full p-2 bg-[#2f2f2f] rounded"
+                className={adminInput}
               >
                 <option value="">-- Tỉnh/Thành --</option>
                 {provinces.map((p) => (
@@ -205,7 +214,7 @@ export default function EditCompanyModal({
             </div>
 
             <div>
-              <label className="block text-sm mb-1 text-gray-400">
+              <label className={adminLabel}>
                 Quận/Huyện
               </label>
               <select
@@ -214,7 +223,7 @@ export default function EditCompanyModal({
                 })}
                 value={watch("districtId") || ""}
                 disabled={!provinceId || loadingDistrict}
-                className="w-full p-2 bg-[#2f2f2f] rounded disabled:opacity-50"
+                className={cn(adminInput, "disabled:opacity-50")}
               >
                 <option value="">
                   {loadingDistrict ? "Đang tải..." : "-- Quận/Huyện --"}
@@ -235,11 +244,11 @@ export default function EditCompanyModal({
           </div>
 
           <div>
-            <p className="text-sm mb-1 text-gray-400">Lĩnh vực</p>
-            <p className="text-xs text-gray-500 mb-2">
+            <p className={adminLabel}>Lĩnh vực</p>
+            <p className="mb-2 text-xs text-zinc-500 dark:text-zinc-400">
               Chọn các lĩnh vực của công ty.
             </p>
-            <div className="max-h-44 overflow-y-auto overscroll-y-contain rounded-md border border-gray-600/60 bg-[#2a2a2a] p-2 pr-1.5 [scrollbar-gutter:stable]">
+            <div className={cn(adminPickerBox, "max-h-44")}>
               <div className="flex flex-wrap gap-2 content-start min-h-0">
                 {parentCategories.map((c) => {
                   const selected = watch("categoryIds")?.includes(c.id);
@@ -262,11 +271,7 @@ export default function EditCompanyModal({
                           });
                         }
                       }}
-                      className={`shrink-0 px-3 py-1 rounded-full text-sm border transition ${
-                        selected
-                          ? "bg-purple-500 text-white border-purple-500"
-                          : "bg-transparent text-gray-300 border-gray-600 hover:bg-gray-700"
-                      }`}
+                      className={selected ? adminTagActive : adminTagIdle}
                     >
                       {c.name}
                     </button>
@@ -277,7 +282,7 @@ export default function EditCompanyModal({
           </div>
 
           <div>
-            <label className="block text-sm mb-1 text-gray-400">
+            <label className={adminLabel}>
               Trạng thái
             </label>
             <Controller
@@ -287,7 +292,7 @@ export default function EditCompanyModal({
                 <select
                   value={field.value ? "true" : "false"}
                   onChange={(e) => field.onChange(e.target.value === "true")}
-                  className="w-full p-2 bg-[#2f2f2f] rounded"
+                  className={adminInput}
                 >
                   <option value="true">Hoạt động</option>
                   <option value="false">Ngừng hoạt động</option>

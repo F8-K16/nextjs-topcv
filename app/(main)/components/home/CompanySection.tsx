@@ -14,6 +14,7 @@ import Image from "next/image";
 import { companyService } from "@/services/company.service";
 import { STALE_PUBLIC_COMPANY_LIST_MS } from "@/lib/query-stale-time";
 import { companyFiltersToStableQuery } from "@/lib/stable-query-key";
+import { companyPublicPath } from "@/lib/company-path";
 
 export default function CompanySection() {
   const { filters, setFilter } = useCompanyFilterStore();
@@ -56,7 +57,7 @@ export default function CompanySection() {
         {data.companies.map((company) => (
           <div
             key={company.id}
-            onClick={() => router.push(`/companies/${company.id}`)}
+            onClick={() => router.push(companyPublicPath(company))}
             className="rounded-xl bg-linear-to-br from-[#fff4df] to white border border-[#ffbb50] p-4 hover:shadow-md hover:border-[#d76b00] transition cursor-pointer"
           >
             <div className="flex gap-3">

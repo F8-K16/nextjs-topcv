@@ -17,6 +17,7 @@ import {
 
 import Image from "next/image";
 import Link from "next/link";
+import { jobPublicPath } from "@/lib/job-path";
 
 import {
   formatExperience,
@@ -122,10 +123,10 @@ export default function SavedJobList() {
 
           return (
             <div
-              key={item.id}
+              key={item.jobId}
               className="flex gap-4 rounded-2xl border border-gray-100 bg-linear-to-br from-white to-[#f6fbf8] p-4 md:p-5 transition hover:border-[#00b14f]/30 hover:shadow-md"
             >
-              <Link href={`/jobs/${job.id}`}>
+              <Link href={jobPublicPath(job)}>
                 <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-gray-50">
                   <Image
                     src={job.company.logo || "/images/logo-default.png"}
@@ -138,7 +139,7 @@ export default function SavedJobList() {
               </Link>
 
               <div className="flex-1 min-w-0">
-                <Link href={`/jobs/${job.id}`}>
+                <Link href={jobPublicPath(job)}>
                   <h3 className="line-clamp-1 text-[15px] font-semibold text-[#263a4d] hover:text-[#00b14f]">
                     {job.title}
                   </h3>

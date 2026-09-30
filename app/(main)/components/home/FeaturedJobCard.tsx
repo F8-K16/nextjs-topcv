@@ -7,11 +7,12 @@ import type { Job } from "@/app/types/job.type";
 import { formatSalaryShort } from "@/utils/helper";
 import SaveJobButton from "../buttons/SaveJobButton";
 import AppliedJobBadge from "../badges/AppliedJobBadge";
+import { jobPublicPath } from "@/lib/job-path";
 
 export default function FeaturedJobCard({ job }: { job: Job }) {
   return (
     <article className="group flex h-full flex-col rounded-2xl border border-zinc-200/80 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5">
-      <Link href={`/jobs/${job.id}`} className="flex flex-1 flex-col gap-3">
+      <Link href={jobPublicPath(job)} className="flex flex-1 flex-col gap-3">
         <div className="flex gap-3">
           <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-zinc-50 ring-1 ring-zinc-100">
             <Image
@@ -19,7 +20,7 @@ export default function FeaturedJobCard({ job }: { job: Job }) {
               alt=""
               width={56}
               height={56}
-              className="h-full w-full object-cover"
+              className="h-full w-full object-contain"
             />
           </div>
           <div className="min-w-0 flex-1">

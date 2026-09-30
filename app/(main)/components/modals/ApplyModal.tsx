@@ -26,6 +26,7 @@ import type { CvListItem } from "@/app/types/cv.type";
 import axiosClient from "@/lib/axios";
 import type { Job } from "@/app/types/job.type";
 import { aiService } from "@/services/ai.service";
+import { usePublicFeatures } from "@/hooks/usePublicFeatures";
 import { parseSharedCvIdFromResumeFileUrl } from "@/lib/cv-resume-url";
 
 type ApplyResumeOption = {
@@ -42,6 +43,7 @@ function ApplyModalBody({
   closeModal: () => void;
 }) {
   const queryClient = useQueryClient();
+  const { ai } = usePublicFeatures();
   const userId = useAuthStore((s) => s.user?.id);
   const [selectedOption, setSelectedOption] = useState<{
     id: number;
@@ -274,23 +276,24 @@ function ApplyModalBody({
                       Đã nhận hồ sơ
                     </div>
                     <div className="mt-0.5 text-xs text-gray-500">
-                      Đang chấm điểm match giữa CV và JD. Bạn có thể đóng, hệ
-                      thống sẽ chạy nền.
+                      {ai
+                        ? "Đang chấm điểm match giữa CV và JD. Bạn có thể đóng, hệ thống sẽ chạy nền."
+                        : "Nhà tuyển dụng đã nhận hồ sơ của bạn."}
                     </div>
                   </div>
-                  {aiMatchStatus === "DONE" ? (
+                  {ai && aiMatchStatus === "DONE" ? (
                     <span className="rounded-full bg-[#00b14f]/10 px-2.5 py-1 text-xs font-semibold text-[#00b14f]">
                       AI Match {aiMatchScore ?? 0}%
                     </span>
-                  ) : (
+                  ) : ai ? (
                     <span className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700">
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
                       Đang xử lý
                     </span>
-                  )}
+                  ) : null}
                 </div>
 
-                <div className="mt-4 space-y-2 text-sm">
+                {ai ? <div className="mt-4 space-y-2 text-sm">
                   <div className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50/60 px-3 py-2">
                     <span className="text-gray-700">1) Lưu hồ sơ</span>
                     <span className="text-xs font-semibold text-emerald-700">
@@ -325,9 +328,9 @@ function ApplyModalBody({
                             : "Lỗi"}
                     </span>
                   </div>
-                </div>
+                </div> : null}
 
-                {aiMatchStatus === "FAILED" ? (
+                {ai && aiMatchStatus === "FAILED" ? (
                   <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
                     {aiMatchError ||
                       "Không chấm được điểm AI, vui lòng thử lại sau."}
@@ -429,6 +432,7 @@ function ApplyModalBody({
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
+                    {ai ? (
                     <button
                       type="button"
                       onClick={() => coverLetterMutation.mutate()}
@@ -447,6 +451,7 @@ function ApplyModalBody({
                         </>
                       )}
                     </button>
+                    ) : null}
                     <button
                       type="button"
                       onClick={async () => {
@@ -469,7 +474,11 @@ function ApplyModalBody({
                 <textarea
                   value={coverLetter}
                   onChange={(e) => setCoverLetter(e.target.value)}
-                  placeholder="Nhấn “AI gợi ý” để tạo thư ứng tuyển..."
+                  placeholder={
+                    ai
+                      ? "Nhấn “AI gợi ý” để tạo thư ứng tuyển..."
+                      : "Nhập thư ứng tuyển (không bắt buộc)..."
+                  }
                   className="mt-3 min-h-[220px] w-full resize-y rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm leading-relaxed text-gray-800 outline-none focus:border-[#00b14f] focus:ring-2 focus:ring-[#00b14f]/15 sm:min-h-[260px]"
                 />
               </div>

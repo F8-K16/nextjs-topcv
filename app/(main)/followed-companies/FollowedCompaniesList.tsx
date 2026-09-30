@@ -12,6 +12,7 @@ import { companyFollowService } from "@/services/company-follow.service";
 import { formatDate, formatGeographyLine } from "@/utils/helper";
 import { getErrorToastMessage } from "@/lib/submit-error";
 import CandidateOnlyNotice from "@/app/(main)/components/CandidateOnlyNotice";
+import { companyPublicPath } from "@/lib/company-path";
 
 export default function FollowedCompaniesList() {
   const { user } = useAuthStore();
@@ -70,7 +71,7 @@ export default function FollowedCompaniesList() {
           className="flex flex-col gap-3 rounded-xl border border-gray-100 bg-gray-50/50 p-4 sm:flex-row sm:items-center sm:justify-between"
         >
           <Link
-            href={`/companies/${company.id}`}
+            href={companyPublicPath(company)}
             className="flex min-w-0 flex-1 items-start gap-3"
           >
             <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-white ring-1 ring-gray-100">

@@ -199,7 +199,7 @@ export default function FormUploadCV() {
               <iframe
                 title="Xem trước CV"
                 src={resumeUrl}
-                className="h-[min(420px,50vh)] w-full border-0 bg-white sm:h-[min(520px,55vh)]"
+                className="h-[min(780px,78vh)] w-full border-0 bg-white sm:h-[min(960px,85vh)]"
                 style={{ colorScheme: "light" }}
               />
             </div>

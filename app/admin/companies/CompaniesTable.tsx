@@ -11,8 +11,24 @@ import { toast } from "sonner";
 import { useModal } from "../components/ModalManager";
 import { companyService } from "@/services/company.service";
 import { locationService } from "@/services/location.service";
-import { ADMIN_ADD_NEW_BUTTON, ADMIN_NATIVE_SELECT } from "@/lib/admin-ui";
+import {
+  ADMIN_ADD_NEW_BUTTON,
+  ADMIN_NATIVE_SELECT,
+  ADMIN_PAGE_STACK,
+  ADMIN_SEARCH_ICON,
+  ADMIN_SEARCH_WRAP,
+  adminSearchFieldWithIcon,
+  adminSurfaceCardBlur,
+  adminTable,
+} from "@/lib/admin-ui";
 import AdminPagination from "@/components/admin/AdminPagination";
+import { AdminStatusChip } from "@/components/admin/admin-status-chip";
+import {
+  AdminPageHeader,
+  AdminToolbar,
+  AdminToolbarRow,
+} from "@/components/admin/admin-page-header";
+import { cn } from "@/lib/utils";
 import { getErrorToastMessage } from "@/lib/submit-error";
 function companyListStatusBadge(c: Company) {
   const employers = c.employers ?? [];
@@ -24,37 +40,37 @@ function companyListStatusBadge(c: Company) {
   if (!hasApproved) {
     if (allRejected) {
       return {
-        label: "Đã từ chối tài khoản NTD",
-        className: "bg-zinc-500/20 text-zinc-800 dark:text-zinc-300",
+        label: "NTD từ chối",
+        tone: "neutral" as const,
       };
     }
     if (employers.length === 0) {
       return {
-        label: "Chưa có nhà tuyển dụng",
-        className: "bg-amber-500/20 text-amber-900 dark:text-amber-400",
+        label: "Chưa NTD",
+        tone: "warning" as const,
       };
     }
     if (hasPending) {
       return {
-        label: "Chờ duyệt tài khoản NTD",
-        className: "bg-amber-500/20 text-amber-900 dark:text-amber-400",
+        label: "Chờ NTD",
+        tone: "warning" as const,
       };
     }
     return {
-      label: "Chờ duyệt tài khoản NTD",
-      className: "bg-amber-500/20 text-amber-400",
+      label: "Chờ NTD",
+      tone: "warning" as const,
     };
   }
 
   if (c.status) {
     return {
-      label: "Hoạt động",
-      className: "bg-green-500/20 text-green-800 dark:text-green-400",
+      label: "Bật",
+      tone: "success" as const,
     };
   }
   return {
-    label: "Ngừng (khóa bởi admin)",
-    className: "bg-red-500/20 text-red-800 dark:text-red-400",
+    label: "Khóa",
+    tone: "danger" as const,
   };
 }
 
@@ -189,11 +205,11 @@ export default function CompaniesTable({ data }: { data: CompanyResponse }) {
 
   return (
     <div>
-      <div className="mt-4 mb-4 space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-xl font-semibold text-zinc-900 dark:text-white">
-            Danh sách công ty
-          </h2>
+      <div className={ADMIN_PAGE_STACK}>
+      <AdminPageHeader
+        title="Công ty"
+        description="Lọc theo danh mục, tỉnh thành và trạng thái hoạt động."
+        actions={
           <button
             type="button"
             onClick={() =>
@@ -201,31 +217,29 @@ export default function CompaniesTable({ data }: { data: CompanyResponse }) {
             }
             className={ADMIN_ADD_NEW_BUTTON}
           >
-            <Plus size={18} />
+            <Plus size={14} />
             Thêm mới
           </button>
-        </div>
+        }
+      />
 
-        <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
-          <div className="relative">
+      <AdminToolbar>
+        <AdminToolbarRow>
+          <div className={cn(ADMIN_SEARCH_WRAP, "sm:max-w-none xl:max-w-sm")}>
             <input
               onChange={handleSearch}
               defaultValue={searchParams.get("search") || ""}
               placeholder="Tên công ty, địa chỉ, website..."
-              className="w-full rounded-xl border border-zinc-200 bg-white py-2.5 pl-12 pr-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:ring-2 focus:ring-violet-500/40 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-zinc-500 dark:focus:ring-violet-500/50"
+              className={adminSearchFieldWithIcon}
             />
-            <Search
-              className="absolute left-3 top-2.5 text-zinc-400 dark:text-gray-400"
-              size={18}
-            />
+            <Search className={ADMIN_SEARCH_ICON} />
           </div>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
-            <select
+          <select
               onChange={(e) => handleCategoryChange(e.target.value)}
               defaultValue={searchParams.get("categoryId") || ""}
               className={ADMIN_NATIVE_SELECT}
             >
-              <option value="">-- Danh mục --</option>
+              <option value="">Danh mục</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -238,7 +252,7 @@ export default function CompaniesTable({ data }: { data: CompanyResponse }) {
               defaultValue={searchParams.get("provinceId") || ""}
               className={ADMIN_NATIVE_SELECT}
             >
-              <option value="">-- Tỉnh/Thành --</option>
+              <option value="">Tỉnh/Thành</option>
               {provinces.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
@@ -253,7 +267,7 @@ export default function CompaniesTable({ data }: { data: CompanyResponse }) {
               className={ADMIN_NATIVE_SELECT}
             >
               <option value="">
-                {loadingDistrict ? "Đang tải..." : "-- Quận/Huyện --"}
+                {loadingDistrict ? "Đang tải..." : "Quận/Huyện"}
               </option>
 
               {districts.map((d) => (
@@ -268,20 +282,19 @@ export default function CompaniesTable({ data }: { data: CompanyResponse }) {
               defaultValue={searchParams.get("status") || ""}
               className={ADMIN_NATIVE_SELECT}
             >
-              <option value="">-- Trạng thái --</option>
+              <option value="">Trạng thái</option>
               <option value="true">Hoạt động</option>
               <option value="false">Ngừng</option>
             </select>
-          </div>
-        </div>
-      </div>
+        </AdminToolbarRow>
+      </AdminToolbar>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-[#1f1f1f] dark:bg-[#1e1e1e]"
+        className={cn(adminSurfaceCardBlur, "p-4 sm:p-5")}
       >
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-zinc-200 dark:divide-gray-700">
+          <table className={cn(adminTable, "divide-y divide-zinc-200 dark:divide-gray-700")}>
             <thead>
               <tr>
                 {[
@@ -327,7 +340,7 @@ export default function CompaniesTable({ data }: { data: CompanyResponse }) {
                           alt={c.name}
                           width={20}
                           height={20}
-                          className="w-10 h-10 rounded object-cover bg-white"
+                          className="w-10 h-10 rounded object-contain bg-white"
                         />
 
                         <div className="flex flex-col">
@@ -354,30 +367,31 @@ export default function CompaniesTable({ data }: { data: CompanyResponse }) {
 
                     <td className="px-6 py-4 text-zinc-600 dark:text-gray-300">
                       <div className="min-w-0 max-w-[320px] text-sm">
-                        <p className="line-clamp-2 break-words text-zinc-800 dark:text-gray-200">
+                        <p className="line-clamp-2 break-words text-[12px] text-zinc-800 dark:text-gray-200">
                           {c.location}
                         </p>
-                        <p className="mt-0.5 line-clamp-1 text-zinc-500 dark:text-gray-500">
+                        <p className="mt-0.5 line-clamp-1 text-[12px] text-zinc-500 dark:text-gray-500">
                           {c.district?.name}, {c.province?.name}
                         </p>
                       </div>
                     </td>
 
                     <td className="px-6 py-4 text-zinc-600 dark:text-gray-300">
-                      <span className="rounded bg-blue-500/20 px-2 py-1 text-sm text-blue-800 dark:text-blue-400">
+                      <AdminStatusChip tone="info">
                         {c._count?.jobs ?? 0}
-                      </span>
+                      </AdminStatusChip>
                     </td>
 
                     <td className="px-6 py-4">
                       {(() => {
                         const b = companyListStatusBadge(c);
                         return (
-                          <span
-                            className={`px-2 py-1 rounded text-sm ${b.className}`}
+                          <AdminStatusChip
+                            tone={b.tone}
+                            title={b.label}
                           >
                             {b.label}
-                          </span>
+                          </AdminStatusChip>
                         );
                       })()}
                     </td>
@@ -425,6 +439,7 @@ export default function CompaniesTable({ data }: { data: CompanyResponse }) {
           />
         </div>
       </motion.div>
+      </div>
     </div>
   );
 }

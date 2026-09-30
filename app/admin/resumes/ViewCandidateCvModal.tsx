@@ -8,6 +8,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import CvCanvas from "@/app/(main)/cv/_components/CvCanvas";
+import { adminDialogSurface } from "@/lib/admin-ui";
+import { cn } from "@/lib/utils";
 import { cvService } from "@/services/cv.service";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
@@ -36,12 +38,12 @@ export default function ViewCandidateCvModal({
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[92vh] w-full max-w-[calc(100vw-2rem)] gap-0 overflow-hidden border-white/10 bg-[#1e1e1e] p-0 text-white sm:max-w-6xl lg:max-w-7xl">
-        <DialogHeader className="border-b border-white/10 px-6 py-4 text-left">
-          <DialogTitle className="pr-8 text-lg font-semibold text-white">
+      <DialogContent className={cn("max-h-[92vh] w-full max-w-[calc(100vw-2rem)] gap-0 overflow-hidden p-0 sm:max-w-6xl lg:max-w-7xl border", adminDialogSurface)}>
+        <DialogHeader className="border-b border-zinc-200 px-6 py-4 text-left dark:border-white/10">
+          <DialogTitle className="pr-8 text-base font-semibold text-zinc-900 dark:text-white">
             {titleHint || cv?.title || "Xem CV từ mẫu"}
           </DialogTitle>
-          <DialogDescription className="text-sm text-zinc-400">
+          <DialogDescription className="text-xs text-zinc-500 dark:text-zinc-400">
             {candidateLabel ? `Ứng viên: ${candidateLabel}` : null}
           </DialogDescription>
         </DialogHeader>

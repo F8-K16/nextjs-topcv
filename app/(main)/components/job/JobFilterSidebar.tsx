@@ -1,11 +1,13 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import FilterList from "./FilterList";
 import { SlidersHorizontal, X } from "lucide-react";
 import { useMetadataStore } from "@/app/stores/metadata.store";
+import { useLocationStore } from "@/app/stores/location.store";
 import CategoryFilterAccordion from "./CategoryFilterAccordion";
+import { buildCategoryTree } from "@/lib/category-hierarchy";
 
 const FILTER_KEYS = [
   "categoryIds",
@@ -19,9 +21,10 @@ const FILTER_KEYS = [
 ] as const;
 
 export default function JobFilterSidebar() {
-  const { data } = useMetadataStore();
+  const { data, fetchMeta } = useMetadataStore();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { fetchDistricts, districtsMap, loadingDistrict } = useLocationStore();
 
   const salaryOptions = useMemo(() => data?.SalaryRangeOptions ?? [], [data]);
   const expOptions = useMemo(() => data?.EXPERIENCE_OPTIONS ?? [], [data]);
@@ -37,15 +40,47 @@ export default function JobFilterSidebar() {
     [data],
   );
 
-  if (!data) return null;
-
   const currentProvince = searchParams.get("provinceId");
+
+  useEffect(() => {
+    void fetchMeta({ force: true });
+  }, [fetchMeta]);
+
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === "visible") {
+        void fetchMeta({ force: true });
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [fetchMeta]);
+
+  useEffect(() => {
+    if (currentProvince) void fetchDistricts(Number(currentProvince));
+  }, [currentProvince, fetchDistricts]);
+
+  const districtOptions = useMemo(() => {
+    if (!currentProvince) return [];
+    const list = districtsMap[Number(currentProvince)] ?? [];
+    return list.map((d) => ({ value: String(d.id), label: d.name }));
+  }, [currentProvince, districtsMap]);
+
+  const categoryTree = useMemo(
+    () =>
+      data?.categories?.length
+        ? buildCategoryTree(data.categories)
+        : (data?.categoryTree ?? []),
+    [data?.categories, data?.categoryTree],
+  );
+
   const currentSalary = searchParams.get("salaryRange");
   const currentExp = searchParams.get("experienceLevel");
   const currentJobType = searchParams.get("jobType");
+  const currentDistrict = searchParams.get("districtId");
 
   const activeFilterCount = FILTER_KEYS.reduce((n, key) => {
-    if (key === "categoryId") return n;
+    if (key === "categoryId" || key === "categoryIds") return n;
     const v = searchParams.get(key);
     return v ? n + 1 : n;
   }, 0);
@@ -57,17 +92,27 @@ export default function JobFilterSidebar() {
   const handleFilter = (key: string, value: string | number) => {
     const params = new URLSearchParams(searchParams.toString());
 
-    if (!value) params.delete(key);
-    else params.set(key, String(value));
+    if (key === "provinceId") {
+      params.delete("districtId");
+      if (!value) params.delete("provinceId");
+      else params.set("provinceId", String(value));
+    } else if (!value) {
+      params.delete(key);
+    } else {
+      params.set(key, String(value));
+    }
 
     params.delete("page");
 
-    router.push(`/jobs?${params.toString()}`);
+    const qs = params.toString();
+    router.push(qs ? `/jobs?${qs}` : "/jobs", { scroll: false });
   };
 
   const clearAllFilters = () => {
-    router.push("/jobs");
+    router.push("/jobs", { scroll: false });
   };
+
+  if (!data) return null;
 
   return (
     <aside className="z-20 w-full shrink-0 md:sticky md:top-20 md:w-[260px] md:self-start lg:w-[280px]">
@@ -114,7 +159,7 @@ export default function JobFilterSidebar() {
 
         <div className="custom-scrollbar flex-1 space-y-0 overflow-y-auto px-3 py-3">
           <Section title="Ngành nghề">
-            <CategoryFilterAccordion tree={data.categoryTree} />
+            <CategoryFilterAccordion tree={categoryTree} />
           </Section>
 
           <SectionDivider />
@@ -126,6 +171,25 @@ export default function JobFilterSidebar() {
               current={currentProvince}
               onSelect={(val) => handleFilter("provinceId", val)}
             />
+            {currentProvince ? (
+              <div className="mt-3">
+                <p className="mb-1.5 text-[11px] font-semibold text-zinc-500">
+                  Quận / Huyện
+                </p>
+                {districtOptions.length > 0 ? (
+                  <FilterList
+                    groupLabel="Lọc theo quận huyện"
+                    items={districtOptions}
+                    current={currentDistrict}
+                    onSelect={(val) => handleFilter("districtId", val)}
+                  />
+                ) : (
+                  <p className="px-1 text-xs text-zinc-400">
+                    {loadingDistrict ? "Đang tải…" : "Chưa có quận huyện"}
+                  </p>
+                )}
+              </div>
+            ) : null}
           </Section>
 
           <SectionDivider />

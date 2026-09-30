@@ -3,10 +3,10 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import {
   LoginState,
-  getCurrentUser,
   loginAction,
   removeToken,
   saveToken,
+  verifyTwoFactorAction,
 } from "../../actions/auth.action";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -19,10 +19,12 @@ import {
   authFormFooterTextClass,
   authFormShellClass,
   authLabelClass,
+  authOtpFieldClass,
   authPrimaryButtonClass,
   authSecondaryLinkClass,
 } from "@/lib/auth-ui";
 import AuthSocialSection from "../components/AuthSocialSection";
+import AuthBackHome from "../components/AuthBackHome";
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/app/stores/auth.store";
 import { API_BASE_URL } from "@/lib/api-base-url";
@@ -35,6 +37,21 @@ function getSafeRedirectPath(raw: string | undefined): string | null {
   if (!t.startsWith("/") || t.startsWith("//")) return null;
   if (t.includes(":")) return null;
   return t;
+}
+
+function destinationForRoles(
+  roles: string[],
+  redirect?: string,
+  setupRequired?: boolean,
+) {
+  if (setupRequired && roles.includes("ADMIN")) return "/admin/security";
+  const fromQuery = getSafeRedirectPath(redirect);
+  if (fromQuery) return fromQuery;
+  if (roles.some((r) => ["ADMIN", "MODERATOR", "SUPPORT"].includes(r))) {
+    return "/admin";
+  }
+  if (roles.includes("EMPLOYER")) return "/employer";
+  return "/";
 }
 
 function buildLoginPath(redirect?: string) {
@@ -56,6 +73,11 @@ export default function LoginForm({
   const [state, action, pending] = useActionState(loginAction, initialState);
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [challengeToken, setChallengeToken] = useState<string | null>(null);
+  const [otp, setOtp] = useState("");
+  const [otpPending, setOtpPending] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showGoogleOauthView, setShowGoogleOauthView] = useState(() =>
     Boolean(oauthCode),
   );
@@ -94,6 +116,12 @@ export default function LoginForm({
         return;
       }
 
+      if (res.data.twoFactorRequired && res.data.challengeToken) {
+        setChallengeToken(res.data.challengeToken);
+        setShowGoogleOauthView(false);
+        return;
+      }
+
       const { accessToken, refreshToken, user } = res.data;
       try {
         await saveToken({ accessToken, refreshToken });
@@ -106,56 +134,97 @@ export default function LoginForm({
         return;
       }
 
-      const fromQuery = getSafeRedirectPath(redirect);
-      const nextUrl = fromQuery
-        ? fromQuery
-        : user.roles?.some((r: string) =>
-              ["ADMIN", "MODERATOR", "SUPPORT"].includes(r),
-            )
-          ? "/admin"
-          : user.roles?.includes("EMPLOYER")
-            ? "/employer"
-            : "/";
-
-      window.location.replace(nextUrl);
+      window.location.replace(
+        destinationForRoles(
+          user.roles ?? [],
+          redirect,
+          Boolean(res.data.twoFactorSetupRequired),
+        ),
+      );
     };
 
     void run();
   }, [clearAuth, oauthCode, redirect, router]);
 
   useEffect(() => {
-    const handleLoginRedirect = async () => {
-      if (!state.success) return;
+    if (state.twoFactorRequired && state.challengeToken) {
+      setChallengeToken(state.challengeToken);
+      return;
+    }
+    if (!state.success) return;
+    window.location.replace(
+      destinationForRoles(
+        state.roles ?? [],
+        redirect,
+        state.twoFactorSetupRequired,
+      ),
+    );
+  }, [
+    state.success,
+    state.roles,
+    state.twoFactorRequired,
+    state.challengeToken,
+    state.twoFactorSetupRequired,
+    redirect,
+  ]);
 
-      const res = await getCurrentUser();
-      if (!res) {
-        toast.error(
-          "Đăng nhập thành công nhưng chưa thể lấy phiên người dùng. Vui lòng tải lại trang hoặc đăng nhập lại.",
-        );
-        return;
-      }
-      const user = res!.data;
+  const submitOtp = async () => {
+    if (!challengeToken) return;
+    setOtpPending(true);
+    const result = await verifyTwoFactorAction({
+      challengeToken,
+      code: otp.trim(),
+    });
+    setOtpPending(false);
+    if (!result.success) {
+      toast.error(result.error || "Mã xác thực không đúng");
+      return;
+    }
+    window.location.replace(destinationForRoles(result.roles ?? [], redirect));
+  };
 
-      const fromQuery = getSafeRedirectPath(redirect);
-      if (fromQuery) {
-        window.location.href = fromQuery;
-        return;
-      }
-
-      if (
-        user.roles?.some((r: string) =>
-          ["ADMIN", "MODERATOR", "SUPPORT"].includes(r),
-        )
-      ) {
-        window.location.href = "/admin";
-      } else if (user.roles?.includes("EMPLOYER")) {
-        window.location.href = "/employer";
-      } else {
-        window.location.href = "/";
-      }
-    };
-    handleLoginRedirect();
-  }, [state.success, router, redirect]);
+  if (challengeToken) {
+    return (
+      <div className={authFormShellClass}>
+        <div className={authFormCardClass}>
+          <AuthBackHome />
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
+            Xác thực hai lớp
+          </h1>
+          <p className="mt-2 text-sm leading-relaxed text-zinc-600">
+            Nhập mã 6 số từ ứng dụng xác thực của tài khoản quản trị.
+          </p>
+          <form
+            className="mt-8 space-y-5"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void submitOtp();
+            }}
+          >
+            <label className={authLabelClass} htmlFor="login-otp">
+              Mã xác thực
+            </label>
+            <input
+              id="login-otp"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              value={otp}
+              onChange={(event) => setOtp(event.target.value)}
+              className={authOtpFieldClass}
+              placeholder="000000"
+            />
+            <button
+              type="submit"
+              disabled={otpPending || otp.trim().length !== 6}
+              className={authPrimaryButtonClass}
+            >
+              {otpPending ? "Đang xác thực..." : "Xác nhận"}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   if (showGoogleOauthView) {
     return (
@@ -180,6 +249,7 @@ export default function LoginForm({
   return (
     <div className={authFormShellClass}>
       <div className={authFormCardClass}>
+        <AuthBackHome />
         <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
           Đăng nhập
         </h1>
@@ -199,6 +269,8 @@ export default function LoginForm({
                 name="email"
                 autoComplete="email"
                 placeholder="email@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className={authFieldClass}
               />
               <Mail
@@ -224,6 +296,8 @@ export default function LoginForm({
                 name="password"
                 autoComplete="current-password"
                 placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className={`${authFieldClass} pr-11`}
               />
               <KeyRound

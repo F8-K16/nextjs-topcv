@@ -10,14 +10,20 @@ import { MessageCircle } from "lucide-react";
 import { employerPortalService } from "@/services/employer-portal.service";
 import { EmployerQueryError, EmployerQueryLoading } from "../employer-query-ui";
 import { getErrorToastMessage } from "@/lib/submit-error";
+import { formatDate } from "@/utils/helper";
+import { cn } from "@/lib/utils";
 import {
   STALE_EMPLOYER_APPLICATIONS_MS,
   STALE_EMPLOYER_JOBS_PICKER_MS,
 } from "@/lib/query-stale-time";
 import { useAuthStore } from "@/app/stores/auth.store";
+import { usePublicFeatures } from "@/hooks/usePublicFeatures";
 import StartConversationNav from "@/app/(main)/components/chat/StartConversationNav";
 
-import EmployerApplicationDetailModal from "./EmployerApplicationDetailModal";
+import EmployerApplicationDetailModal, {
+  EmployerApplicationPreviewPane,
+} from "./EmployerApplicationDetailModal";
+import OptionSelect from "@/components/ui/option-select";
 
 type AppRow = {
   id: number;
@@ -44,6 +50,31 @@ const PAGE_SIZE = 20;
 
 const APP_STATUSES = ["PENDING", "REVIEWED", "ACCEPTED", "REJECTED"] as const;
 
+function appStatusLabel(status: string) {
+  const map: Record<string, string> = {
+    PENDING: "Chờ",
+    REVIEWED: "Đã xem",
+    ACCEPTED: "Đạt",
+    REJECTED: "Loại",
+  };
+  return map[status] ?? status;
+}
+
+function appBadgeClass(status: string) {
+  switch (status) {
+    case "PENDING":
+      return "bg-amber-100 text-amber-900";
+    case "REVIEWED":
+      return "bg-sky-100 text-sky-900";
+    case "ACCEPTED":
+      return "bg-emerald-100 text-emerald-900";
+    case "REJECTED":
+      return "bg-red-100 text-red-900";
+    default:
+      return "bg-zinc-100 text-zinc-700";
+  }
+}
+
 function buildQs(page: number, jobId: string, status: string): string {
   const p = new URLSearchParams();
   p.set("page", String(Math.max(1, page)));
@@ -61,9 +92,11 @@ export default function EmployerApplicationsPageClient() {
   const pathname = usePathname();
   const sp = useSearchParams();
   const userId = useAuthStore((s) => s.user?.id);
+  const { ai } = usePublicFeatures();
   const [detailApplicationId, setDetailApplicationId] = useState<number | null>(
     null,
   );
+  const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const page = Math.max(1, Number(sp.get("page")) || 1);
   const jobId = sp.get("jobId") ?? "";
@@ -121,6 +154,10 @@ export default function EmployerApplicationsPageClient() {
   }
 
   const rows = data.applications as AppRow[];
+  const resolvedSelectedId =
+    selectedId != null && rows.some((row) => row.id === selectedId)
+      ? selectedId
+      : (rows[0]?.id ?? null);
   const { pagination } = data;
   const { page: cur, totalPages, total } = pagination;
 
@@ -136,7 +173,7 @@ export default function EmployerApplicationsPageClient() {
           Hồ sơ ứng tuyển
         </h1>
         <p className="mt-1 text-sm text-zinc-500">
-          Xem CV và thư ứng tuyển trong một cửa sổ — không cần mở link chia sẻ.
+          Xem CV và thư ứng tuyển từ ứng viên.
         </p>
       </div>
 
@@ -146,133 +183,137 @@ export default function EmployerApplicationsPageClient() {
             <label className="mb-1 block text-xs font-medium text-zinc-500">
               Lọc theo tin
             </label>
-            <select
+            <OptionSelect
+              ariaLabel="Lọc theo tin"
+              placeholder="Tất cả tin"
+              className="min-w-55"
               value={jobId}
-              onChange={(e) =>
-                setParams({ jobId: e.target.value || null, page: null })
+              options={jobOptions.map((j) => ({
+                value: String(j.id),
+                label: j.title,
+              }))}
+              onChange={(next) =>
+                setParams({ jobId: next || null, page: null })
               }
-              className="min-w-55 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm scheme:light"
-            >
-              <option value="">{"Tất cả tin"}</option>
-              {jobOptions.map((j) => (
-                <option key={j.id} value={String(j.id)}>
-                  {j.title}
-                </option>
-              ))}
-            </select>
+            />
           </div>
           <div>
             <label className="mb-1 block text-xs font-medium text-zinc-500">
               Trạng thái hồ sơ
             </label>
-            <select
+            <OptionSelect
+              ariaLabel="Trạng thái hồ sơ"
+              placeholder="Tất cả"
+              className="min-w-45"
               value={status}
-              onChange={(e) =>
-                setParams({ status: e.target.value || null, page: null })
+              options={APP_STATUSES.map((s) => ({
+                value: s,
+                label: appStatusLabel(s),
+              }))}
+              onChange={(next) =>
+                setParams({ status: next || null, page: null })
               }
-              className="min-w-45 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm scheme:light"
-            >
-              <option value="">Tất cả</option>
-              <option value="PENDING">Chờ</option>
-              <option value="REVIEWED">Đã xem</option>
-              <option value="ACCEPTED">Đạt</option>
-              <option value="REJECTED">Loại</option>
-            </select>
+            />
           </div>
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-zinc-200 bg-white shadow-sm">
-        <table className="min-w-full text-left text-sm">
-          <thead className="sticky top-0 z-10 border-b border-zinc-200 bg-zinc-50 text-xs font-semibold uppercase text-zinc-500">
-            <tr>
-              <th className="px-4 py-3">Tin</th>
-              <th className="px-4 py-3">Ứng viên</th>
-              <th className="px-4 py-3">SĐT</th>
-              <th className="px-4 py-3">Hồ sơ</th>
-              <th className="px-4 py-3">Match</th>
-              <th className="px-4 py-3">Trạng thái</th>
-              <th className="px-4 py-3">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-100">
-            {rows.length === 0 && (
-              <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-zinc-500">
-                  Không có hồ sơ
-                </td>
-              </tr>
-            )}
-            {rows.map((row) => (
-              <tr key={row.id} className="hover:bg-zinc-50/80">
-                  <td className="px-4 py-3 text-zinc-700">{row.job.title}</td>
-                  <td className="px-4 py-3">
-                    <div className="font-medium text-zinc-900">
-                      {row.candidate.user.username}
-                    </div>
-                    <div className="text-xs text-zinc-500">
-                      {row.candidate.user.email}
-                    </div>
-                  </td>
-
-                  <td className="px-4 py-3 text-zinc-700">
-                    {row.candidate.user.userPhone?.phone
-                      ? `${row.candidate.user.userPhone.phone}`
-                      : "—"}
-                  </td>
-
-                  <td className="px-4 py-3">
+      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
+        <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+          {rows.length === 0 ? (
+            <p className="px-4 py-14 text-center text-sm text-zinc-500">
+              Không có hồ sơ
+            </p>
+          ) : (
+            <ul className="max-h-[min(40rem,70vh)] space-y-2 overflow-y-auto p-2">
+              {rows.map((row) => {
+                const name = row.candidate.user.username || "Ứ";
+                const active = row.id === resolvedSelectedId;
+                return (
+                  <li
+                    key={row.id}
+                    className={cn(
+                      "overflow-hidden rounded-xl border border-[#00b14f]/20 bg-linear-to-br from-[#00b14f]/14 via-white to-[#087a38]/10 shadow-xs transition",
+                      active
+                        ? "ring-2 ring-[#00b14f]/60 ring-offset-1"
+                        : "hover:shadow-sm",
+                    )}
+                  >
                     <button
                       type="button"
-                      onClick={() => setDetailApplicationId(row.id)}
-                      className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:brightness-110"
+                      onClick={() => {
+                        setSelectedId(row.id);
+                        if (!window.matchMedia("(min-width: 1024px)").matches) {
+                          setDetailApplicationId(row.id);
+                        }
+                      }}
+                      className="flex w-full items-start gap-3 px-3 py-3 text-left"
                     >
-                      Xem chi tiết
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#00b14f]/15 text-sm font-semibold text-[#087a38]">
+                        {name.slice(0, 1).toUpperCase()}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="flex items-center gap-2">
+                          <span className="truncate text-sm font-semibold text-zinc-900">
+                            {name}
+                          </span>
+                          {ai && typeof row.aiMatchScore === "number" ? (
+                            <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                              AI {row.aiMatchScore}%
+                            </span>
+                          ) : null}
+                        </span>
+                        <span className="mt-0.5 block truncate text-xs text-zinc-500">
+                          {row.job.title}
+                        </span>
+                        <span className="mt-1.5 flex flex-wrap items-center gap-2">
+                          <span
+                            className={cn(
+                              "rounded-full px-2 py-0.5 text-[11px] font-semibold",
+                              appBadgeClass(row.status),
+                            )}
+                          >
+                            {appStatusLabel(row.status)}
+                          </span>
+                          <span className="text-[11px] text-zinc-400">
+                            {formatDate(row.createdAt)}
+                          </span>
+                        </span>
+                      </span>
                     </button>
-                  </td>
-                  <td className="px-4 py-3 text-zinc-700">
-                    {typeof row.aiMatchScore === "number" ? (
-                      <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
-                        AI {row.aiMatchScore}%
-                      </span>
-                    ) : row.aiMatchStatus === "RUNNING" ||
-                      row.aiMatchStatus === "PENDING" ? (
-                      <span className="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-700">
-                        AI đang chấm
-                      </span>
-                    ) : row.aiMatchStatus === "FAILED" ? (
-                      <span className="rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-800">
-                        AI lỗi
-                      </span>
-                    ) : (
-                      "—"
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <select
-                      value={row.status}
-                      onChange={(e) => onStatus(row.id, e.target.value)}
-                      className="max-w-36 rounded-lg border border-zinc-200 bg-white px-2 py-1.5 text-xs scheme:light"
-                    >
-                      <option value="PENDING">Chờ</option>
-                      <option value="REVIEWED">Đã xem</option>
-                      <option value="ACCEPTED">Đạt</option>
-                      <option value="REJECTED">Loại</option>
-                    </select>
-                  </td>
-                  <td className="px-4 py-3">
-                    <StartConversationNav
-                      peerUserId={row.candidate.user.id}
-                      className="inline-flex items-center gap-1 rounded-lg border border-zinc-200 bg-white px-2 py-1.5 text-xs font-medium text-primary hover:bg-primary/5 disabled:cursor-wait disabled:opacity-80"
-                    >
-                      <MessageCircle className="h-3.5 w-3.5" />
-                      Nhắn tin
-                    </StartConversationNav>
-                  </td>
-                </tr>
-            ))}
-          </tbody>
-        </table>
+                    <div className="flex items-center justify-between gap-2 px-3 pb-3">
+                      <OptionSelect
+                        ariaLabel={`Trạng thái hồ sơ ${name}`}
+                        allowClear={false}
+                        size="sm"
+                        className="w-32"
+                        value={row.status}
+                        options={APP_STATUSES.map((s) => ({
+                          value: s,
+                          label: appStatusLabel(s),
+                        }))}
+                        onChange={(next) => {
+                          if (next) void onStatus(row.id, next);
+                        }}
+                      />
+                      <StartConversationNav
+                        peerUserId={row.candidate.user.id}
+                        className="inline-flex items-center gap-1 rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs font-medium text-primary hover:bg-primary/5 disabled:cursor-wait disabled:opacity-80"
+                      >
+                        <MessageCircle className="h-3.5 w-3.5" />
+                        Nhắn tin
+                      </StartConversationNav>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+
+        <div className="hidden min-h-[32rem] overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm lg:block">
+          <EmployerApplicationPreviewPane applicationId={resolvedSelectedId} />
+        </div>
       </div>
 
       <EmployerApplicationDetailModal

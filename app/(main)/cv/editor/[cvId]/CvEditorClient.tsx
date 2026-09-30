@@ -26,6 +26,7 @@ import CvCanvas from "../../_components/CvCanvas";
 import EditorSectionsPanel from "./EditorSectionsPanel";
 import AiSuggestSummaryModal from "./AiSuggestSummaryModal";
 import { aiService } from "@/services/ai.service";
+import { usePublicFeatures } from "@/hooks/usePublicFeatures";
 import { API_BASE_URL } from "@/lib/api-base-url";
 import { getErrorToastMessage } from "@/lib/submit-error";
 
@@ -46,6 +47,7 @@ const formatTime = (iso?: string) => {
 
 export default function CvEditorClient({ cvId }: Props) {
   const queryClient = useQueryClient();
+  const { ai } = usePublicFeatures();
   const user = useAuthStore((s) => s.user);
   const isAuthed = Boolean(user?.id);
 
@@ -365,6 +367,7 @@ export default function CvEditorClient({ cvId }: Props) {
               {cv.status === "COMPLETED" ? "Hoàn tất" : "Bản nháp"}
             </div>
 
+            {ai ? (
             <button
               type="button"
               onClick={() => void requestAiSummary()}
@@ -372,6 +375,7 @@ export default function CvEditorClient({ cvId }: Props) {
             >
               <Sparkles className="h-4 w-4" /> AI gợi ý Giới thiệu
             </button>
+            ) : null}
           </div>
 
           <EditorSectionsPanel

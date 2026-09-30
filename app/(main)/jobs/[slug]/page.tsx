@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import {
   MapPin,
   CircleDollarSign,
@@ -27,17 +27,23 @@ import JobContactEmployerCta from "./JobContactEmployerCta";
 import JobAiQuestions from "./JobAiQuestions";
 import type { Job } from "@/app/types/job.type";
 import { nextFetchCache } from "@/lib/next-fetch-cache";
+import { companyPublicPath } from "@/lib/company-path";
 import {
   parseJobDescription,
   type ParsedJobDescription,
 } from "@/lib/job-description";
 import { BreadcrumbDetailLabel } from "@/contexts/BreadcrumbDetailContext";
 import { API_BASE_URL } from "@/lib/api-base-url";
+import { fetchPublicFeatures } from "@/lib/public-features";
+import { buildJobPostingJsonLd, jsonLdScript } from "@/lib/job-posting";
+import { jobPublicPath } from "@/lib/job-path";
+import JobViewSourceTracker from "./JobViewSourceTracker";
 
-async function getJob(id: number): Promise<Job | null> {
+async function getJob(key: string): Promise<Job | null> {
   const base = API_BASE_URL;
-  if (!base || Number.isNaN(id)) return null;
-  const res = await fetch(`${base}/jobs/${id}`, {
+  const slug = key.trim();
+  if (!base || !slug) return null;
+  const res = await fetch(`${base}/jobs/${encodeURIComponent(slug)}`, {
     ...nextFetchCache.jobDetail,
   });
   if (res.status === 404 || !res.ok) return null;
@@ -45,27 +51,51 @@ async function getJob(id: number): Promise<Job | null> {
 }
 
 type Props = {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id: idParam } = await params;
-  const id = Number(idParam);
-  if (Number.isNaN(id)) return { title: "Chi tiết việc làm" };
-  const job = await getJob(id);
+  const { slug } = await params;
+  const job = await getJob(slug);
   if (!job) return { title: "Việc làm" };
   const companyName = job.company?.name?.trim() || "Doanh nghiệp";
+  const title = `${job.title} · ${companyName}`;
+  const description = `${job.title} tại ${companyName}. Ứng tuyển ngay trên TopCV.`;
+  const path = jobPublicPath(job);
+  const site =
+    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+    "http://localhost:3001";
   return {
-    title: `${job.title} · ${companyName}`,
+    title,
+    description,
+    alternates: { canonical: `${site}${path}` },
+    openGraph: {
+      title,
+      description,
+      url: `${site}${path}`,
+      type: "website",
+      images: job.company?.logo ? [{ url: job.company.logo }] : undefined,
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
   };
 }
 
 export default async function JobDetailPage({ params }: Props) {
-  const { id: idParam } = await params;
-  const id = Number(idParam);
-  const job = await getJob(id);
+  const { slug } = await params;
+  const [job, features] = await Promise.all([
+    getJob(slug),
+    fetchPublicFeatures(API_BASE_URL),
+  ]);
 
   if (!job) notFound();
+
+  if (job.slug && job.slug !== slug) {
+    redirect(`/jobs/${job.slug}`);
+  }
 
   const deadlineLabel = job.deadline
     ? formatDate(job.deadline)
@@ -84,8 +114,62 @@ export default async function JobDetailPage({ params }: Props) {
     "—";
   const experienceTypeLabel = formatExperienceType(job.experienceLevel);
 
+  const jobPosting = buildJobPostingJsonLd({
+    id: job.id,
+    slug: job.slug,
+    title: job.title,
+    description: job.description,
+    createdAt: job.createdAt,
+    deadline: job.deadline,
+    jobType: job.jobType,
+    experienceLevel: job.experienceLevel,
+    minSalary: job.minSalary,
+    maxSalary: job.maxSalary,
+    workLocation: workplaceLocationDisplay === "—" ? null : workplaceLocationDisplay,
+    company: job.company,
+  });
+
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Trang chủ",
+        item: (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3001").replace(
+          /\/$/,
+          "",
+        ),
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Việc làm",
+        item: `${(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3001").replace(/\/$/, "")}/jobs`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: job.title,
+        item: `${(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3001").replace(/\/$/, "")}${jobPublicPath(job)}`,
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-[#f3f5f7] pb-12 pt-4 md:pt-5">
+      <Suspense fallback={null}>
+        <JobViewSourceTracker jobId={job.id} />
+      </Suspense>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(jobPosting) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbLd) }}
+      />
       <BreadcrumbDetailLabel>{job.title}</BreadcrumbDetailLabel>
       <div className="mx-auto max-w-6xl px-4 md:px-6">
         <div className="grid gap-6 lg:grid-cols-3">
@@ -98,7 +182,7 @@ export default async function JobDetailPage({ params }: Props) {
                       {job.title}
                     </h1>
                     <Link
-                      href={`/companies/${job.company.id}`}
+                      href={companyPublicPath(job.company)}
                       className="mt-1 inline-flex items-center gap-1 text-sm font-semibold text-[#00b14f] hover:underline"
                     >
                       <Building2 className="h-4 w-4 shrink-0" />
@@ -198,12 +282,14 @@ export default async function JobDetailPage({ params }: Props) {
               </Section>
             ) : null}
 
-            <JobAiQuestions
-              jobTitle={job.title}
-              companyName={job.company?.name}
-              jobDescription={job.description}
-              skills={(job.jobSkills ?? []).map(({ skill }) => skill.name)}
-            />
+            {features.ai ? (
+              <JobAiQuestions
+                jobTitle={job.title}
+                companyName={job.company?.name}
+                jobDescription={job.description}
+                skills={(job.jobSkills ?? []).map(({ skill }) => skill.name)}
+              />
+            ) : null}
           </div>
 
           <aside className="space-y-6">
@@ -221,7 +307,7 @@ export default async function JobDetailPage({ params }: Props) {
                 />
                 <div className="min-w-0">
                   <Link
-                    href={`/companies/${job.company.id}`}
+                    href={companyPublicPath(job.company)}
                     className="font-semibold text-gray-900 hover:text-[#00b14f]"
                   >
                     {job.company.name}

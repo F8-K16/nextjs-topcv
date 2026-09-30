@@ -2,7 +2,7 @@
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { useFixedDropdownPlacement } from "@/hooks/use-fixed-dropdown-placement";
@@ -12,6 +12,7 @@ import UserAvatar from "@/app/(main)/components/UserAvatar";
 import { STALE_CHAT_CONVERSATIONS_MS } from "@/lib/query-stale-time";
 
 import { useHeaderDropdownStore } from "@/app/stores/header-dropdown.store";
+import { useChatBoxStore } from "@/app/stores/chatbox.store";
 import { useAuthStore } from "@/app/stores/auth.store";
 import { useChatSocket } from "@/hooks/useChatSocket";
 import {
@@ -37,7 +38,6 @@ const BTN_CLASS =
 const ICON_CLASS = "h-[22px] w-[22px]";
 
 export default function UserChatInbox() {
-  const router = useRouter();
   const pathname = usePathname();
   const qc = useQueryClient();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -46,6 +46,7 @@ export default function UserChatInbox() {
   const openId = useHeaderDropdownStore((s) => s.openId);
   const toggle = useHeaderDropdownStore((s) => s.toggle);
   const close = useHeaderDropdownStore((s) => s.close);
+  const openConversation = useChatBoxStore((s) => s.openConversation);
   const open = openId === "messages";
 
   const closePanel = useCallback(() => {
@@ -100,10 +101,10 @@ export default function UserChatInbox() {
 
   const goToConversation = useCallback(
     (id: number) => {
-      router.push(`/messages/${id}`);
+      openConversation(id);
       closePanel();
     },
-    [router, closePanel],
+    [openConversation, closePanel],
   );
 
   const buttonRef = useRef<HTMLButtonElement>(null);

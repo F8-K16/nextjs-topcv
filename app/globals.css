@@ -8,6 +8,111 @@
   --color-primary-foreground: #ffffff;
   --color-muted: #f4f4f5;
   --color-muted-foreground: #71717a;
+  --color-background: #ffffff;
+  --color-foreground: #18181b;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #18181b;
+  --color-border: #e4e4e7;
+}
+
+.dark {
+  --color-muted: #27272a;
+  --color-muted-foreground: #a1a1aa;
+  --color-background: #09090b;
+  --color-foreground: #fafafa;
+  --color-popover: #18181b;
+  --color-popover-foreground: #fafafa;
+  --color-border: rgba(255, 255, 255, 0.1);
+}
+
+.admin-app {
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.admin-sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.admin-sidebar-scroll:hover,
+.admin-sidebar-scroll:focus-within {
+  scrollbar-color: rgb(161 161 170 / 0.65) transparent;
+}
+
+.dark .admin-sidebar-scroll:hover,
+.dark .admin-sidebar-scroll:focus-within {
+  scrollbar-color: rgb(255 255 255 / 0.28) transparent;
+}
+
+.admin-sidebar-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.admin-sidebar-scroll::-webkit-scrollbar-track {
+  margin: 10px 2px;
+  background: transparent;
+}
+
+.admin-sidebar-scroll::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+  background-color: transparent;
+}
+
+.admin-sidebar-scroll:hover::-webkit-scrollbar-thumb,
+.admin-sidebar-scroll:focus-within::-webkit-scrollbar-thumb {
+  background-color: rgb(113 113 122 / 0.45);
+}
+
+.dark .admin-sidebar-scroll:hover::-webkit-scrollbar-thumb,
+.dark .admin-sidebar-scroll:focus-within::-webkit-scrollbar-thumb {
+  background-color: rgb(255 255 255 / 0.22);
+}
+
+.admin-app table.admin-data-table {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.admin-app table.admin-data-table th {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(113 113 122);
+}
+
+.dark .admin-app table.admin-data-table th {
+  color: rgb(161 161 170);
+}
+
+.admin-app table.admin-data-table thead tr {
+  background: rgb(250 250 250 / 0.95);
+}
+
+.dark .admin-app table.admin-data-table thead tr {
+  background: rgb(255 255 255 / 0.035);
+}
+
+.admin-app table.admin-data-table tbody tr {
+  transition: background-color 0.12s ease;
+}
+
+.admin-app table.admin-data-table tbody tr:hover {
+  background: rgb(245 243 255 / 0.7);
+}
+
+.dark .admin-app table.admin-data-table tbody tr:hover {
+  background: rgb(255 255 255 / 0.045);
+}
+
+.admin-app table.admin-data-table :is(th, td) {
+  padding-top: 0.55rem !important;
+  padding-bottom: 0.55rem !important;
+  padding-left: 0.75rem !important;
+  padding-right: 0.75rem !important;
 }
 
 @keyframes fadeInScale {
@@ -55,4 +160,245 @@
 .hide-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/*
+ * Checkbox: nền theo accent (mặc định xanh thương hiệu), dấu tích luôn trắng.
+ * accent-color của trình duyệt tự chọn màu tick theo độ tương phản, nên tick
+ * trên #00b14f thường bị vẽ tối.
+ */
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  box-sizing: border-box;
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  flex-shrink: 0;
+  vertical-align: middle;
+  border: 1px solid #d4d4d8;
+  border-radius: 0.25rem;
+  background-color: #fff;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 0.75rem 0.75rem;
+  accent-color: #00b14f;
+  color: #fff;
+  cursor: pointer;
+  print-color-adjust: exact;
+}
+
+input[type="checkbox"]:checked,
+input[type="checkbox"]:indeterminate {
+  border-color: #00b14f;
+  background-color: #00b14f;
+  border-color: AccentColor;
+  background-color: AccentColor;
+}
+
+input[type="checkbox"]:checked {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3.5 8.2 6.4 11.1 12.5 4.8' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+input[type="checkbox"]:indeterminate {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3.5 8h9' stroke='%23ffffff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+input[type="checkbox"].accent-rose-500:checked {
+  border-color: #f43f5e;
+  background-color: #f43f5e;
+}
+
+input[type="checkbox"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+input[type="checkbox"]:focus-visible {
+  outline: 2px solid rgb(0 177 79 / 0.45);
+  outline-offset: 2px;
+}
+
+.dark input[type="checkbox"] {
+  border-color: rgb(255 255 255 / 0.24);
+  background-color: #27272a;
+}
+
+.dark input[type="checkbox"]:checked,
+.dark input[type="checkbox"]:indeterminate {
+  border-color: #00b14f;
+  background-color: #00b14f;
+  border-color: AccentColor;
+  background-color: AccentColor;
+}
+
+/* Option của select: nền sáng, mục đang chọn / rê chuột màu xanh lá */
+select {
+  accent-color: #00b14f;
+}
+
+select option {
+  padding: 0.45rem 0.75rem;
+  background-color: #ffffff;
+  color: #263a4d;
+}
+
+select option:hover,
+select option:focus,
+select option:checked {
+  background-color: #00b14f;
+  color: #ffffff;
+}
+
+.dark select {
+  color-scheme: dark;
+}
+
+.dark select option {
+  background-color: #18181b;
+  color: #f4f4f5;
+}
+
+.dark select option:hover,
+.dark select option:focus,
+.dark select option:checked {
+  background-color: #009944;
+  color: #ffffff;
+}
+
+.dark .employer-app {
+  color: #f4f4f5;
+  color-scheme: dark;
+}
+
+.dark .employer-app .bg-white,
+.dark .employer-app .bg-white\/90,
+.dark .employer-app .bg-white\/95 {
+  background-color: #18181b;
+}
+
+.dark .employer-app .bg-zinc-50,
+.dark .employer-app .bg-zinc-50\/40,
+.dark .employer-app .bg-zinc-50\/80,
+.dark .employer-app .bg-zinc-50\/90,
+.dark .employer-app .bg-zinc-100 {
+  background-color: rgb(255 255 255 / 0.06);
+}
+
+.dark .employer-app .text-zinc-900,
+.dark .employer-app .text-zinc-800,
+.dark .employer-app .text-gray-900,
+.dark .employer-app .text-gray-800 {
+  color: #fafafa;
+}
+
+.dark .employer-app .text-zinc-700,
+.dark .employer-app .text-zinc-600,
+.dark .employer-app .text-gray-700,
+.dark .employer-app .text-gray-600 {
+  color: #d4d4d8;
+}
+
+.dark .employer-app .text-zinc-500,
+.dark .employer-app .text-gray-500 {
+  color: #a1a1aa;
+}
+
+.dark .employer-app [class*="border-zinc-200"],
+.dark .employer-app [class*="border-zinc-100"],
+.dark .employer-app [class*="border-gray-200"],
+.dark .employer-app [class*="border-gray-100"] {
+  border-color: rgb(255 255 255 / 0.12);
+}
+
+.dark .employer-app [class*="divide-zinc-"] > :not([hidden]) ~ :not([hidden]),
+.dark .employer-app [class*="divide-gray-"] > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgb(255 255 255 / 0.1);
+}
+
+.dark .employer-app .hover\:bg-white:hover,
+.dark .employer-app .hover\:bg-zinc-50:hover,
+.dark .employer-app .hover\:bg-zinc-100:hover,
+.dark .employer-app .hover\:bg-zinc-200:hover,
+.dark .employer-app .hover\:bg-gray-50:hover {
+  background-color: rgb(255 255 255 / 0.08);
+}
+
+.dark .employer-app input.bg-white,
+.dark .employer-app textarea.bg-white,
+.dark .employer-app select.bg-white,
+.dark .employer-app input[class*="bg-white"],
+.dark .employer-app textarea[class*="bg-white"],
+.dark .employer-app select[class*="bg-white"] {
+  background-color: #27272a;
+  color: #fafafa;
+  color-scheme: dark;
+}
+
+.dark .employer-app input::placeholder,
+.dark .employer-app textarea::placeholder {
+  color: #a1a1aa;
+}
+
+.dark .employer-app .logo-plate,
+.dark .employer-app .logo-plate.bg-white {
+  background-color: #ffffff;
+  border-color: rgb(255 255 255 / 0.16);
+}
+
+.dark .employer-app .keep-light,
+.dark .employer-app .keep-light.bg-white,
+.dark .employer-app .keep-light .bg-white {
+  background-color: #ffffff;
+  color: #18181b;
+}
+
+.dark .employer-app .bg-amber-50,
+.dark .employer-app .bg-amber-50\/80,
+.dark .employer-app .bg-amber-50\/90 {
+  background-color: rgb(120 53 15 / 0.4);
+}
+
+.dark .employer-app .text-amber-950,
+.dark .employer-app .text-amber-900,
+.dark .employer-app .text-amber-800 {
+  color: #fcd34d;
+}
+
+.dark .employer-app [class*="border-amber-"] {
+  border-color: rgb(245 158 11 / 0.35);
+}
+
+.dark .employer-app .bg-red-50,
+.dark .employer-app .bg-red-50\/80,
+.dark .employer-app .bg-red-50\/90 {
+  background-color: rgb(127 29 29 / 0.4);
+}
+
+.dark .employer-app .text-red-900,
+.dark .employer-app .text-red-800,
+.dark .employer-app .text-red-600 {
+  color: #fecaca;
+}
+
+.dark .employer-app [class*="border-red-"] {
+  border-color: rgb(248 113 113 / 0.35);
+}
+
+.dark .employer-app .bg-emerald-50 {
+  background-color: rgb(6 78 59 / 0.45);
+}
+
+.dark .employer-app .text-emerald-900,
+.dark .employer-app .text-emerald-800 {
+  color: #a7f3d0;
+}
+
+.dark .employer-app .bg-sky-50 {
+  background-color: rgb(12 74 110 / 0.45);
+}
+
+.dark .employer-app .text-sky-900,
+.dark .employer-app .text-sky-800 {
+  color: #bae6fd;
 }

@@ -21,6 +21,7 @@ import {
   adminInput,
   adminSurfaceCardBlur,
 } from "@/lib/admin-ui";
+import { AdminPageHeader } from "@/components/admin/admin-page-header";
 
 const schema = z.object({
   siteName: z.string().min(1).max(200),
@@ -159,14 +160,10 @@ export default function AdminSettingsPageClient() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-white">
-          Cài đặt hệ thống
-        </h1>
-        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-500">
-          Tên site, media, SEO, SMTP và chế độ bảo trì
-        </p>
-      </div>
+      <AdminPageHeader
+        title="Cài đặt hệ thống"
+        description="Tên site, media, SEO, SMTP và chế độ bảo trì."
+      />
 
       <motion.div
         initial={{ opacity: 0, y: 12 }}

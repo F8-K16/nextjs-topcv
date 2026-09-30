@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { Bell, CheckCheck, Loader2 } from "lucide-react";
+import { CheckCheck, Loader2 } from "lucide-react";
 
 import { useAuthStore } from "@/app/stores/auth.store";
 import {
@@ -15,6 +15,7 @@ import {
   type AppNotification,
 } from "@/services/notification.service";
 import { cn } from "@/lib/utils";
+import { AdminPageHeader } from "@/components/admin/admin-page-header";
 
 function formatViDateTime(iso: string) {
   try {
@@ -96,27 +97,17 @@ export default function AdminNotificationsPageClient() {
   const totalPages = pagination?.totalPages ?? 1;
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400">
-            <Bell className="h-5 w-5" strokeWidth={1.75} />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-zinc-900 dark:text-white">
-              Thông báo quản trị
-            </h1>
-            <p className="text-xs text-zinc-600 dark:text-zinc-400">
-              Tin chờ duyệt và hoạt động trên hệ thống
-            </p>
-          </div>
-        </div>
-        {unreadTotal > 0 ? (
+    <div className="mx-auto max-w-3xl space-y-4">
+      <AdminPageHeader
+        title="Thông báo quản trị"
+        description="Tin chờ duyệt và hoạt động trên hệ thống."
+        actions={
+          unreadTotal > 0 ? (
           <button
             type="button"
             disabled={markAllMutation.isPending}
             onClick={() => markAllMutation.mutate()}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs font-semibold text-zinc-800 shadow-sm transition hover:bg-zinc-50 disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10"
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 text-[12px] font-medium text-zinc-800 shadow-sm transition hover:bg-zinc-50 disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10"
           >
             {markAllMutation.isPending ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -125,8 +116,9 @@ export default function AdminNotificationsPageClient() {
             )}
             Đánh dấu đã đọc tất cả
           </button>
-        ) : null}
-      </div>
+          ) : null
+        }
+      />
 
       {items.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 px-6 py-14 text-center text-sm text-zinc-600 dark:border-white/10 dark:bg-zinc-900/40 dark:text-zinc-400">

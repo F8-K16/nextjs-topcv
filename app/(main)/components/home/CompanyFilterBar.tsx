@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { useMetadataStore } from "@/app/stores/metadata.store";
@@ -8,14 +8,18 @@ import { useCompanyFilterStore } from "@/app/stores/company.store";
 
 export default function CompanyFilterBar() {
   const { filters, setFilter } = useCompanyFilterStore();
-  const { data, loading } = useMetadataStore();
+  const { data, loading, fetchMeta } = useMetadataStore();
 
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    void fetchMeta();
+  }, [fetchMeta]);
 
   const items = useMemo(() => {
     if (!data) return [];
 
-    return data.categories.map((item) => ({
+    return data.categoryParents.map((item) => ({
       value: String(item.id),
       label: item.name,
     }));

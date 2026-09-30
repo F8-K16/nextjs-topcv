@@ -11,6 +11,7 @@ import {
   formatSalaryShort,
 } from "@/utils/helper";
 import AppliedJobBadge from "@/app/(main)/components/badges/AppliedJobBadge";
+import { jobPublicPath } from "@/lib/job-path";
 
 export default function JobSearchResultRows({ jobs }: { jobs: Job[] }) {
   return (
@@ -21,7 +22,7 @@ export default function JobSearchResultRows({ jobs }: { jobs: Job[] }) {
           className="flex gap-3 rounded-xl border border-[#57d991] bg-[#f2faf6] p-3 transition hover:shadow-md sm:gap-4 sm:p-4"
         >
           <Link
-            href={`/jobs/${job.id}`}
+            href={jobPublicPath(job)}
             className="flex min-w-0 flex-1 gap-3 sm:gap-4"
           >
             <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-gray-50 sm:h-20 sm:w-20 md:h-24 md:w-24">
@@ -30,7 +31,7 @@ export default function JobSearchResultRows({ jobs }: { jobs: Job[] }) {
                 alt={job.company.name}
                 fill
                 sizes="(max-width: 640px) 56px, (max-width: 768px) 80px, 96px"
-                className="object-cover"
+                className="object-contain"
               />
             </div>
 

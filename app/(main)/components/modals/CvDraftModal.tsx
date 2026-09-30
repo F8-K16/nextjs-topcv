@@ -61,7 +61,7 @@ export default function CvDraftModal() {
                   alt={title || `cv-draft-${cvId}`}
                   width={48}
                   height={64}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-contain"
                 />
               ) : (
                 <div className="h-full w-full bg-linear-to-br from-slate-50 to-white" />

@@ -12,6 +12,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { Job } from "@/app/types/job.type";
+import { adminDialogPanel, adminDialogSurface, adminLabel } from "@/lib/admin-ui";
+import { cn } from "@/lib/utils";
 import { invalidatePublicJobListQueries } from "@/lib/public-job-queries";
 import { getErrorToastMessage } from "@/lib/submit-error";
 import { jobService } from "@/services/job.service";
@@ -81,92 +83,92 @@ export default function ViewJobModal({
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="bg-[#1e1e1e] text-white border border-gray-700 min-w-3xl max-h-[min(92vh,900px)] overflow-y-auto">
+      <DialogContent className={cn("min-w-3xl max-h-[min(92vh,900px)] overflow-y-auto border", adminDialogSurface)}>
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">
+          <DialogTitle className="text-base font-semibold">
             Xem việc làm chờ duyệt
           </DialogTitle>
         </DialogHeader>
 
         <div className="mt-3 space-y-5">
           <div>
-            <div className="text-sm text-zinc-400">Tiêu đề</div>
-            <div className="mt-1 text-lg font-semibold">{job.title}</div>
+            <div className={adminLabel}>Tiêu đề</div>
+            <div className="mt-1 text-base font-semibold">{job.title}</div>
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-              <div className="text-sm text-zinc-400">Công ty</div>
+            <div className={adminDialogPanel}>
+              <div className={adminLabel}>Công ty</div>
               <div className="mt-1 font-medium">{job.company?.name ?? "—"}</div>
-              <div className="mt-1 text-sm text-zinc-400">{locationText}</div>
+              <div className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">{locationText}</div>
             </div>
 
-            <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-              <div className="text-sm text-zinc-400">Danh mục</div>
+            <div className={adminDialogPanel}>
+              <div className={adminLabel}>Danh mục</div>
               <div className="mt-1 font-medium">{job.category?.name ?? "—"}</div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-              <div className="text-sm text-zinc-400">Hình thức</div>
+            <div className={adminDialogPanel}>
+              <div className={adminLabel}>Hình thức</div>
               <div className="mt-1 font-medium">
                 {labelOf(job.jobType, JOB_TYPE_LABELS)}
               </div>
             </div>
-            <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-              <div className="text-sm text-zinc-400">Kinh nghiệm</div>
+            <div className={adminDialogPanel}>
+              <div className={adminLabel}>Kinh nghiệm</div>
               <div className="mt-1 font-medium">
                 {labelOf(job.experienceLevel, EXPERIENCE_LABELS)}
               </div>
             </div>
-            <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-              <div className="text-sm text-zinc-400">Số lượng</div>
+            <div className={adminDialogPanel}>
+              <div className={adminLabel}>Số lượng</div>
               <div className="mt-1 font-medium">{job.quantity}</div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-              <div className="text-sm text-zinc-400">Mức lương</div>
+            <div className={adminDialogPanel}>
+              <div className={adminLabel}>Mức lương</div>
               <div className="mt-1 font-medium">{salaryText}</div>
             </div>
-            <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-              <div className="text-sm text-zinc-400">Hạn nộp</div>
+            <div className={adminDialogPanel}>
+              <div className={adminLabel}>Hạn nộp</div>
               <div className="mt-1 font-medium">
                 {job.deadline ? new Date(job.deadline).toLocaleString() : "—"}
               </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-            <div className="text-sm text-zinc-400">Địa điểm làm việc (mô tả)</div>
-            <div className="mt-1 whitespace-pre-wrap text-sm text-zinc-200">
+          <div className={adminDialogPanel}>
+            <div className={adminLabel}>Địa điểm làm việc (mô tả)</div>
+            <div className="mt-1 whitespace-pre-wrap text-[13px] text-zinc-700 dark:text-zinc-200">
               {job.workLocation?.trim() ? job.workLocation : "—"}
             </div>
           </div>
 
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-            <div className="text-sm text-zinc-400">Kỹ năng</div>
+          <div className={adminDialogPanel}>
+            <div className={adminLabel}>Kỹ năng</div>
             {skills.length ? (
               <div className="mt-2 flex flex-wrap gap-2">
                 {skills.map((s) => (
                   <span
                     key={s}
-                    className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-xs text-zinc-200"
+                    className="rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-xs text-zinc-700 dark:border-white/10 dark:bg-black/20 dark:text-zinc-200"
                   >
                     {s}
                   </span>
                 ))}
               </div>
             ) : (
-              <div className="mt-1 text-sm text-zinc-300">—</div>
+              <div className="mt-1 text-[13px] text-zinc-500 dark:text-zinc-400">—</div>
             )}
           </div>
 
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-            <div className="text-sm text-zinc-400">Mô tả</div>
-            <div className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-zinc-200">
+          <div className={adminDialogPanel}>
+            <div className={adminLabel}>Mô tả</div>
+            <div className="mt-2 whitespace-pre-wrap text-[13px] leading-relaxed text-zinc-700 dark:text-zinc-200">
               {job.description}
             </div>
           </div>
@@ -175,7 +177,7 @@ export default function ViewJobModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-zinc-100 hover:bg-white/10"
+              className="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-[13px] font-medium text-zinc-800 hover:bg-zinc-100 dark:border-white/10 dark:bg-white/5 dark:text-zinc-100 dark:hover:bg-white/10"
             >
               Đóng
             </button>

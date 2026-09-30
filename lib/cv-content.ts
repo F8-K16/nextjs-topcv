@@ -49,6 +49,13 @@ export const buildDefaultContent = (
     content = setByPath(content, block.bindingPath, block.defaultValue ?? "");
   }
   for (const section of templateData.sections ?? []) {
+    const sampleItems = (section as CvTemplateSection & {
+      sampleItems?: Record<string, string>[];
+    }).sampleItems;
+    if (Array.isArray(sampleItems) && sampleItems.length > 0) {
+      content = setByPath(content, section.bindingPath, sampleItems.map((item) => ({ ...item })));
+      continue;
+    }
     if (section.defaultItem && Object.keys(section.defaultItem).length > 0) {
       content = setByPath(content, section.bindingPath, [{ ...section.defaultItem }]);
       continue;

@@ -29,7 +29,7 @@ export default function EmployerShell({
 
   if (userId == null || isPending) {
     return (
-      <div className="mx-auto w-full max-w-full px-4 py-8 md:px-6 lg:px-10">
+      <div className="employer-app mx-auto w-full max-w-full px-4 py-8 md:px-6 lg:px-10">
         <div className="flex min-h-[40vh] items-center justify-center text-sm text-zinc-500">
           {MSG_LOAD}
         </div>
@@ -49,8 +49,8 @@ export default function EmployerShell({
             : raw || MSG_FALLBACK;
 
     return (
-      <div className="mx-auto w-full max-w-full px-4 py-8 md:px-6 lg:px-10">
-        <div className="rounded-2xl border border-red-200 bg-red-50/90 p-6 text-sm text-red-900">
+      <div className="employer-app mx-auto w-full max-w-full px-4 py-8 md:px-6 lg:px-10">
+        <div className="rounded-2xl border border-red-200 bg-red-50/90 p-6 text-sm text-red-900 dark:border-red-500/30 dark:bg-red-950/40 dark:text-red-100">
           {vi}
         </div>
       </div>
@@ -60,11 +60,11 @@ export default function EmployerShell({
   const companySuspended = data?.company?.status === false;
 
   return (
-    <div className="mx-auto w-full max-w-full px-4 py-8 md:px-6 lg:px-10">
+    <div className="employer-app mx-auto w-full max-w-full bg-[#f4f6f8] px-4 py-6 md:px-6 lg:px-8 dark:bg-transparent">
       {companySuspended ? (
         <div
           role="status"
-          className="mb-6 rounded-2xl border border-amber-300/90 bg-amber-50 px-4 py-3 text-sm text-amber-950 shadow-sm"
+          className="mb-6 rounded-2xl border border-amber-300/90 bg-amber-50 px-4 py-3 text-sm text-amber-950 shadow-sm dark:border-amber-500/30 dark:bg-amber-950/40 dark:text-amber-100"
         >
           <p className="font-semibold">Công ty đã ngừng hoạt động</p>
           <p className="mt-1.5 leading-relaxed">
@@ -84,6 +84,7 @@ export default function EmployerShell({
           key={pathname}
           companyName={data?.company?.name}
           companyLogo={data?.company?.logo}
+          companyLocked={companySuspended}
         />
         <div className="min-w-0 flex-1 overflow-x-hidden pb-2">{children}</div>
       </div>

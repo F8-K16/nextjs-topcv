@@ -41,6 +41,27 @@ export type EmployerApplicationPreview = {
     | { kind: "template"; title: string; cv: PublicCv };
 };
 
+export type EmployerJobAnalytics = {
+  summary: {
+    jobs: number;
+    views: number;
+    applications: number;
+    conversionRate: number;
+  };
+  sources: Array<{ source: string; views: number }>;
+  jobs: Array<{
+    id: number;
+    title: string;
+    slug: string;
+    moderationStatus: string;
+    createdAt: string;
+    views: number;
+    applications: number;
+    conversionRate: number;
+    sources: Array<{ source: string; views: number }>;
+  }>;
+};
+
 export type EmployerFormMeta = {
   company: {
     id: number;
@@ -149,10 +170,40 @@ export const employerPortalService = {
     }
   },
 
+  async analytics() {
+    try {
+      const res = await axiosClient.get("/employer-portal/analytics");
+      return res.data as EmployerJobAnalytics;
+    } catch (e) {
+      throw handleAxiosError(e);
+    }
+  },
+
   async formMeta() {
     try {
       const res = await axiosClient.get("/employer-portal/form-meta");
       return res.data as EmployerFormMeta;
+    } catch (e) {
+      throw handleAxiosError(e);
+    }
+  },
+
+  async listSkills(search = "") {
+    try {
+      const qs = search.trim()
+        ? `?search=${encodeURIComponent(search.trim())}`
+        : "";
+      const res = await axiosClient.get(`/employer-portal/skills${qs}`);
+      return res.data as { skills: { id: number; name: string }[] };
+    } catch (e) {
+      throw handleAxiosError(e);
+    }
+  },
+
+  async createSkill(name: string) {
+    try {
+      const res = await axiosClient.post("/employer-portal/skills", { name });
+      return res.data as { id: number; name: string };
     } catch (e) {
       throw handleAxiosError(e);
     }
@@ -260,10 +311,21 @@ export const employerPortalService = {
     }
   },
 
-  async suggestedCandidates(limit?: number) {
+  async suggestedCandidates(opts: {
+    limit?: number;
+    page?: number;
+    jobId?: number;
+    provinceId?: number;
+    experienceLevel?: string;
+  } = {}) {
     try {
-      const qs =
-        limit != null ? `?limit=${encodeURIComponent(String(limit))}` : "";
+      const params = new URLSearchParams();
+      if (opts.limit != null) params.set("limit", String(opts.limit));
+      if (opts.page != null) params.set("page", String(opts.page));
+      if (opts.jobId != null) params.set("jobId", String(opts.jobId));
+      if (opts.provinceId != null) params.set("provinceId", String(opts.provinceId));
+      if (opts.experienceLevel) params.set("experienceLevel", opts.experienceLevel);
+      const qs = params.size ? `?${params.toString()}` : "";
       const res = await axiosClient.get<{
         items: Array<{
           candidateId: number;
@@ -275,9 +337,13 @@ export const employerPortalService = {
           };
           province: { name: string } | null;
           district: { name: string } | null;
-          reason: "applied" | "category_match";
+          reason: "applied" | "category_match" | "skill_match" | "multi_match";
+          matchedSkillCount: number;
+          matchedCategoryCount: number;
           hint: string;
         }>;
+        pagination: { total: number; page: number; limit: number; totalPages: number };
+        context: { jobCount: number; categoryIds: number[]; skillCount: number };
       }>(`/employer-portal/suggested-candidates${qs}`);
       return res.data;
     } catch (e) {

@@ -1,26 +1,27 @@
 "use client";
 
 import { CheckCircle2, Send } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-import { useAuthStore } from "@/app/stores/auth.store";
 import { useModalStore } from "@/app/stores/modal.store";
 import { useAppliedJobs } from "@/hooks/use-applied-jobs";
-import { useAuthenticatedNonCandidate } from "@/hooks/useAuthenticatedNonCandidate";
+import { useRBAC } from "@/hooks/useRBAC";
 
 type Props = {
   jobId: number;
 };
 
 export default function ApplyJobButton({ jobId }: Props) {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, can } = useRBAC();
   const { openModal } = useModalStore();
+  const router = useRouter();
   const { hasApplied } = useAppliedJobs();
   const applied = hasApplied(jobId);
-  const hideCandidateFeatures = useAuthenticatedNonCandidate();
 
   const handleApply = () => {
     if (!isAuthenticated) {
-      openModal("login");
+      const next = `${window.location.pathname}${window.location.search}`;
+      router.push(`/auth/login?redirect=${encodeURIComponent(next)}`);
       return;
     }
     if (applied) return;
@@ -28,7 +29,8 @@ export default function ApplyJobButton({ jobId }: Props) {
     openModal("apply", { jobId });
   };
 
-  if (hideCandidateFeatures) {
+  // Chỉ ứng viên (và khách chưa đăng nhập) mới thấy nút ứng tuyển
+  if (!can("jobs:apply") && isAuthenticated) {
     return null;
   }
 

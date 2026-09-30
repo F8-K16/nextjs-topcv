@@ -17,6 +17,7 @@ import SaveJobButton from "../buttons/SaveJobButton";
 import AppliedJobBadge from "../badges/AppliedJobBadge";
 import { STALE_PUBLIC_JOB_LIST_MS } from "@/lib/query-stale-time";
 import { jobFiltersToStableQuery } from "@/lib/stable-query-key";
+import { jobPublicPath } from "@/lib/job-path";
 
 export default function JobSection() {
   const { filters, setFilter } = useJobFilterStore();
@@ -88,7 +89,7 @@ export default function JobSection() {
               key={job.id}
               className="rounded-xl border border-white bg-white p-3 hover:border-[#00b14f]"
             >
-              <Link href={`/jobs/${job.id}`}>
+              <Link href={jobPublicPath(job)}>
                 <div className="flex gap-3">
                   <div className="h-16 w-16 overflow-hidden rounded-sm bg-gray-50">
                     <Image
@@ -96,7 +97,7 @@ export default function JobSection() {
                       alt={job.company.name}
                       width={63}
                       height={63}
-                      className="w-full h-full object-fill"
+                      className="w-full h-full object-contain"
                     />
                   </div>
 

@@ -33,14 +33,14 @@ import UserAvatar from "@/app/(main)/components/UserAvatar";
 import Image from "next/image";
 import { formatDate } from "@/utils/helper";
 import { useAdminDashboardSummary } from "@/hooks/use-admin-dashboard-summary";
+import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import {
   adminBorderSubtle,
-  adminLead,
-  adminPageTitle,
   adminSectionTitle,
   adminSurfaceCardBlur,
 } from "@/lib/admin-ui";
 import { cn } from "@/lib/utils";
+import { AdminStatusChip } from "@/components/admin/admin-status-chip";
 
 export default function DashboardOverview() {
   const { resolvedTheme } = useTheme();
@@ -130,19 +130,17 @@ export default function DashboardOverview() {
 
   return (
     <div className="space-y-8 pb-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className={adminPageTitle}>Tổng quan</h1>
-          <p className={cn("mt-1", adminLead)}>
-            Thống kê người dùng, tin tuyển dụng và ứng tuyển theo thời gian.
-          </p>
-        </div>
-        {isFetching && (
-          <span className="text-xs text-zinc-500 dark:text-zinc-500">
-            Đang làm mới…
-          </span>
-        )}
-      </div>
+      <AdminPageHeader
+        title="Tổng quan"
+        description="Thống kê người dùng, tin tuyển dụng và ứng tuyển theo thời gian."
+        actions={
+          isFetching ? (
+            <span className="text-xs text-zinc-500 dark:text-zinc-500">
+              Đang làm mới…
+            </span>
+          ) : null
+        }
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <AdminStatCard
@@ -208,7 +206,7 @@ export default function DashboardOverview() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           className={cn(
-            "xl:col-span-2 p-5 shadow-xl dark:shadow-black/30",
+            "xl:col-span-2 p-5",
             adminSurfaceCardBlur,
           )}
         >
@@ -219,7 +217,7 @@ export default function DashboardOverview() {
             <span className="text-xs text-zinc-500">6 tháng gần nhất</span>
           </div>
           <div className="h-80 w-full min-w-0">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={320} debounce={50}>
               <AreaChart
                 data={chartRows}
                 margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
@@ -290,7 +288,7 @@ export default function DashboardOverview() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
           className={cn(
-            "p-5 shadow-xl dark:shadow-black/30",
+            "p-5",
             adminSurfaceCardBlur,
           )}
         >
@@ -311,7 +309,7 @@ export default function DashboardOverview() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           className={cn(
-            "xl:col-span-2 p-5 shadow-xl dark:shadow-black/30",
+            "xl:col-span-2 p-5",
             adminSurfaceCardBlur,
           )}
         >
@@ -321,8 +319,8 @@ export default function DashboardOverview() {
             </h2>
             <span className="text-xs text-zinc-500">30 ngày gần nhất</span>
           </div>
-          <div className="h-75 w-full min-w-0">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="h-80 w-full min-w-0">
+            <ResponsiveContainer width="100%" height={320} debounce={50}>
               <LineChart
                 data={dailyRows}
                 margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
@@ -387,7 +385,7 @@ export default function DashboardOverview() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.04 }}
           className={cn(
-            "p-5 shadow-xl dark:shadow-black/30",
+            "p-5",
             adminSurfaceCardBlur,
           )}
         >
@@ -400,8 +398,8 @@ export default function DashboardOverview() {
           {hotCategoryRows.length === 0 ? (
             <p className="text-sm text-zinc-500">Chưa có dữ liệu ứng tuyển.</p>
           ) : (
-            <div className="h-75 w-full min-w-0">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="h-80 w-full min-w-0">
+              <ResponsiveContainer width="100%" height={320} debounce={50}>
                 <BarChart
                   layout="vertical"
                   data={hotCategoryRows}
@@ -500,7 +498,7 @@ export default function DashboardOverview() {
                     alt=""
                     width={40}
                     height={40}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-contain"
                   />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -582,7 +580,7 @@ export default function DashboardOverview() {
           </Link>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-160 text-left text-sm">
+          <table className="admin-data-table w-full min-w-160 text-left">
             <thead>
               <tr
                 className={cn(
@@ -611,7 +609,7 @@ export default function DashboardOverview() {
                           alt=""
                           width={40}
                           height={40}
-                          className="h-full w-full object-cover"
+                          className="h-full w-full object-contain"
                         />
                       </div>
                       <span className="line-clamp-1 font-medium text-zinc-900 dark:text-white">
@@ -629,21 +627,25 @@ export default function DashboardOverview() {
                     {j.deadline ? formatDate(j.deadline) : "—"}
                   </td>
                   <td className="py-2.5">
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                    <AdminStatusChip
+                      tone={
                         j.moderationStatus === "APPROVED"
-                          ? "bg-emerald-500/15 text-emerald-800 dark:text-emerald-300"
+                          ? "success"
                           : j.moderationStatus === "PENDING"
-                            ? "bg-amber-500/15 text-amber-900 dark:text-amber-200"
-                            : "bg-red-500/15 text-red-800 dark:text-red-300"
-                      }`}
+                            ? "warning"
+                            : "danger"
+                      }
                     >
-                      {j.moderationStatus}
-                    </span>
+                      {j.moderationStatus === "APPROVED"
+                        ? "Duyệt"
+                        : j.moderationStatus === "PENDING"
+                          ? "Chờ"
+                          : "Từ chối"}
+                    </AdminStatusChip>
                     {j.isFeatured && (
-                      <span className="ml-2 rounded-full bg-violet-500/20 px-2 py-0.5 text-xs text-violet-800 dark:text-violet-200">
-                        Nổi bật
-                      </span>
+                      <AdminStatusChip tone="violet" className="ml-1">
+                        Hot
+                      </AdminStatusChip>
                     )}
                   </td>
                 </tr>

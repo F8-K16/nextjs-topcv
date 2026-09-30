@@ -56,7 +56,7 @@ function DropdownMenuItem({
       data-slot="dropdown-menu-item"
       data-inset={inset ? "" : undefined}
       className={cn(
-        "relative flex cursor-default select-none items-center gap-2 rounded-lg px-2 py-2 text-sm outline-none focus:bg-zinc-100 data-disabled:pointer-events-none data-disabled:opacity-50 data-[highlighted]:bg-zinc-100 dark:focus:bg-white/10 dark:data-[highlighted]:bg-white/10",
+        "relative flex cursor-default select-none items-center gap-2 rounded-lg px-2 py-2 text-sm outline-none focus:bg-emerald-50 focus:text-emerald-950 data-disabled:pointer-events-none data-disabled:opacity-50 data-[highlighted]:bg-emerald-50 data-[highlighted]:text-emerald-950 dark:focus:bg-emerald-500/15 dark:focus:text-emerald-100 dark:data-[highlighted]:bg-emerald-500/15 dark:data-[highlighted]:text-emerald-100",
         inset && "pl-8",
         className,
       )}

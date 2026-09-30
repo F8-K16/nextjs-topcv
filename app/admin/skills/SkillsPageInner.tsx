@@ -13,13 +13,22 @@ import AdminPagination from "@/components/admin/AdminPagination";
 import { cn } from "@/lib/utils";
 import {
   ADMIN_ADD_NEW_BUTTON,
+  ADMIN_PAGE_STACK,
+  ADMIN_SEARCH_ICON,
+  ADMIN_SEARCH_WRAP,
   adminInputCompact,
   adminSearchFieldGrow,
   adminSearchFieldWithIcon9,
   adminSurfaceCardBlur,
+  adminTable,
   adminTableDivide,
   adminTableHeadRow,
 } from "@/lib/admin-ui";
+import {
+  AdminPageHeader,
+  AdminToolbar,
+  AdminToolbarRow,
+} from "@/components/admin/admin-page-header";
 import { STALE_ADMIN_SKILLS_MS } from "@/lib/query-stale-time";
 import { getErrorToastMessage } from "@/lib/submit-error";
 
@@ -107,7 +116,7 @@ export function SkillsPageInner() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className={ADMIN_PAGE_STACK}>
       <AdminConfirmDialog
         open={deleteId != null}
         onOpenChange={(o) => !o && setDeleteId(null)}
@@ -132,23 +141,15 @@ export function SkillsPageInner() {
         }}
       />
 
-      <div>
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-white">
-          Kỹ năng
-        </h1>
-        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-500">
-          CRUD kỹ năng dùng gắn vào tin tuyển dụng (JobSkill).
-        </p>
-      </div>
+      <AdminPageHeader
+        title="Kỹ năng"
+        description="CRUD kỹ năng dùng gắn vào tin tuyển dụng (JobSkill)."
+      />
 
-      <div
-        className={cn(
-          adminSurfaceCardBlur,
-          "flex flex-col gap-3 p-4 sm:flex-row sm:items-end",
-        )}
-      >
-        <div className="relative min-w-[200px] flex-1">
-          <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-zinc-400 dark:text-zinc-500" />
+      <AdminToolbar>
+        <AdminToolbarRow>
+        <div className={ADMIN_SEARCH_WRAP}>
+          <Search className={ADMIN_SEARCH_ICON} />
           <input
             defaultValue={search}
             placeholder="Tìm theo tên..."
@@ -163,12 +164,11 @@ export function SkillsPageInner() {
             }}
           />
         </div>
-        <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center">
-          <input
+        <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Tên kỹ năng mới"
-            className={adminSearchFieldGrow}
+            className={cn(adminSearchFieldGrow, "max-w-xs")}
           />
           <button
             type="button"
@@ -176,18 +176,18 @@ export function SkillsPageInner() {
             onClick={() => createMut.mutate()}
             className={ADMIN_ADD_NEW_BUTTON}
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-3.5 w-3.5" />
             Thêm
           </button>
-        </div>
-      </div>
+        </AdminToolbarRow>
+      </AdminToolbar>
 
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         className={cn(adminSurfaceCardBlur, "overflow-hidden p-0 shadow-xl")}
       >
-        <table className={cn("min-w-full text-sm", adminTableDivide)}>
+        <table className={cn(adminTable, adminTableDivide)}>
           <thead>
             <tr
               className={cn(

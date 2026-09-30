@@ -4,9 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import {
   ArrowRight,
-  Briefcase,
   Check,
-  ClipboardList,
   Clock,
   ShieldCheck,
   XCircle,
@@ -22,7 +20,6 @@ import {
 import { STALE_EMPLOYER_DASHBOARD_MS } from "@/lib/query-stale-time";
 import { useAuthStore } from "@/app/stores/auth.store";
 
-const MSG_TITLE = "Chào mừng trở lại";
 const MSG_SUB =
   "Quản lý tin tuyển dụng và hồ sơ ứng viên cho công ty của bạn.";
 const MSG_FLOW =
@@ -34,9 +31,7 @@ const L_APP = "Hồ sơ ứng tuyển";
 const L_RECENT_JOBS = "Tin gần đây";
 const L_RECENT_APP = "Ứng tuyển gần đây";
 const L_VIEW_ALL = "Xem tất cả";
-const L_PENDING = "Chờ duyệt";
 const L_APPROVED = "Đã duyệt";
-const L_REJECTED = "Từ chối";
 const L_APP_PENDING = "Chờ xử lý";
 const L_APP_REVIEWED = "Đã xem";
 const L_APP_ACCEPTED = "Đạt";
@@ -151,12 +146,16 @@ export default function EmployerDashboardPageClient() {
     });
   }
 
+  const showOnboarding = !companyProfileDone || !jobsDone;
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-zinc-900">{MSG_TITLE}</h1>
+        <h1 className="text-2xl font-bold text-zinc-900">
+          {company?.name || "Công ty"}
+          <span className="font-medium text-zinc-400"> · hôm nay</span>
+        </h1>
         <p className="mt-1 text-sm text-zinc-600">{MSG_SUB}</p>
-        <p className="mt-2 text-xs font-medium text-zinc-500">{MSG_FLOW}</p>
       </div>
 
       {actionItems.length > 0 ? (
@@ -189,8 +188,10 @@ export default function EmployerDashboardPageClient() {
         </section>
       ) : null}
 
+      {showOnboarding ? (
       <section className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
         <h2 className="text-sm font-semibold text-zinc-900">{L_ONBOARD}</h2>
+        <p className="mt-1 text-xs text-zinc-500">{MSG_FLOW}</p>
         <ol className="mt-4 grid gap-3 sm:grid-cols-3">
           <li>
             <Link
@@ -270,14 +271,46 @@ export default function EmployerDashboardPageClient() {
           </li>
         </ol>
       </section>
+      ) : null}
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="flex items-center gap-2 text-sm font-semibold text-zinc-900">
-              <Briefcase className="h-4 w-4 text-primary" />
-              {L_JOBS}
-            </h2>
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {[
+          { label: L_JOBS, value: stats.jobs.total, href: "/employer/jobs" },
+          {
+            label: L_APPROVED,
+            value: stats.jobs.approved,
+            href: "/employer/jobs?moderationStatus=APPROVED",
+          },
+          {
+            label: L_APP,
+            value: stats.applications.total,
+            href: "/employer/applications",
+          },
+          {
+            label: L_APP_PENDING,
+            value: stats.applications.pending,
+            href: "/employer/applications?status=PENDING",
+          },
+        ].map((card) => (
+          <Link
+            key={card.label}
+            href={card.href}
+            className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm transition hover:border-[#00b14f]/40"
+          >
+            <p className="text-xs font-medium text-zinc-500">{card.label}</p>
+            <p className="mt-2 text-3xl font-bold tabular-nums text-zinc-900">
+              {card.value}
+            </p>
+          </Link>
+        ))}
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
+          <div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3">
+            <span className="text-sm font-semibold text-zinc-900">
+              {L_RECENT_JOBS}
+            </span>
             <Link
               href="/employer/jobs"
               className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
@@ -285,84 +318,6 @@ export default function EmployerDashboardPageClient() {
               {L_VIEW_ALL}
               <ArrowRight className="h-3 w-3" />
             </Link>
-          </div>
-          <p className="text-3xl font-bold text-zinc-900">
-            {stats.jobs.total}
-          </p>
-          <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
-            <div className="rounded-xl bg-amber-50 py-2 text-amber-900">
-              <div className="font-medium text-amber-800/80">{L_PENDING}</div>
-              <div className="text-lg font-bold">{stats.jobs.pending}</div>
-            </div>
-            <div className="rounded-xl bg-emerald-50 py-2 text-emerald-900">
-              <div className="font-medium text-emerald-800/80">
-                {L_APPROVED}
-              </div>
-              <div className="text-lg font-bold">{stats.jobs.approved}</div>
-            </div>
-            <div className="rounded-xl bg-red-50 py-2 text-red-900">
-              <div className="font-medium text-red-800/80">{L_REJECTED}</div>
-              <div className="text-lg font-bold">{stats.jobs.rejected}</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="flex items-center gap-2 text-sm font-semibold text-zinc-900">
-              <ClipboardList className="h-4 w-4 text-amber-600" />
-              {L_APP}
-            </h2>
-            <Link
-              href="/employer/applications"
-              className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-            >
-              {L_VIEW_ALL}
-              <ArrowRight className="h-3 w-3" />
-            </Link>
-          </div>
-          <p className="text-3xl font-bold text-zinc-900">
-            {stats.applications.total}
-          </p>
-          <div className="mt-4 grid grid-cols-2 gap-2 text-center text-xs sm:grid-cols-4">
-            <div className="rounded-xl bg-zinc-50 py-2 text-zinc-900">
-              <div className="font-medium text-zinc-600">{L_APP_PENDING}</div>
-              <div className="text-lg font-bold">
-                {stats.applications.pending}
-              </div>
-            </div>
-            <div className="rounded-xl bg-sky-50 py-2 text-sky-900">
-              <div className="font-medium text-sky-800/80">
-                {L_APP_REVIEWED}
-              </div>
-              <div className="text-lg font-bold">
-                {stats.applications.reviewed}
-              </div>
-            </div>
-            <div className="rounded-xl bg-emerald-50 py-2 text-emerald-900">
-              <div className="font-medium text-emerald-800/80">
-                {L_APP_ACCEPTED}
-              </div>
-              <div className="text-lg font-bold">
-                {stats.applications.accepted}
-              </div>
-            </div>
-            <div className="rounded-xl bg-red-50 py-2 text-red-900">
-              <div className="font-medium text-red-800/80">
-                {L_APP_REJECTED}
-              </div>
-              <div className="text-lg font-bold">
-                {stats.applications.rejected}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
-          <div className="border-b border-zinc-100 px-4 py-3 text-sm font-semibold text-zinc-900">
-            {L_RECENT_JOBS}
           </div>
           <ul className="divide-y divide-zinc-100">
             {recentJobs.length === 0 && (
@@ -408,8 +363,17 @@ export default function EmployerDashboardPageClient() {
         </div>
 
         <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
-          <div className="border-b border-zinc-100 px-4 py-3 text-sm font-semibold text-zinc-900">
-            {L_RECENT_APP}
+          <div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3">
+            <span className="text-sm font-semibold text-zinc-900">
+              {L_RECENT_APP}
+            </span>
+            <Link
+              href="/employer/applications"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+            >
+              {L_VIEW_ALL}
+              <ArrowRight className="h-3 w-3" />
+            </Link>
           </div>
           <ul className="divide-y divide-zinc-100">
             {recentApplications.length === 0 && (
@@ -417,37 +381,47 @@ export default function EmployerDashboardPageClient() {
                 {"Chưa có hồ sơ"}
               </li>
             )}
-            {recentApplications.map((row) => (
+            {recentApplications.map((row) => {
+              const name = row.candidate.user.username || "Ứ";
+              return (
               <li key={row.id} className="px-4 py-3 text-sm">
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <div className="font-medium text-zinc-900">
-                      {row.candidate.user.username}
+                <div className="flex items-start gap-3">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#00b14f]/10 text-sm font-semibold text-[#087a38]">
+                    {name.slice(0, 1).toUpperCase()}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="font-medium text-zinc-900">{name}</div>
+                        <div className="truncate text-xs text-zinc-500">
+                          {row.job.title}
+                        </div>
+                      </div>
+                      <span
+                        className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${appBadgeClass(row.status)}`}
+                      >
+                        {appStatusLabel(row.status)}
+                      </span>
                     </div>
-                    <div className="text-xs text-zinc-500">
-                      {row.job.title}
+                    <div className="mt-1 flex items-center gap-1 text-xs text-zinc-400">
+                      <Clock className="h-3 w-3" />
+                      {formatDate(row.createdAt)}
                     </div>
                   </div>
-                  <span
-                    className={`shrink-0 rounded-lg px-2 py-0.5 text-xs font-semibold ${appBadgeClass(row.status)}`}
-                  >
-                    {appStatusLabel(row.status)}
-                  </span>
-                </div>
-                <div className="mt-1 flex items-center gap-1 text-xs text-zinc-400">
-                  <Clock className="h-3 w-3" />
-                  {formatDate(row.createdAt)}
                 </div>
               </li>
-            ))}
+              );
+            })}
           </ul>
         </div>
       </div>
 
+      {showOnboarding ? (
       <div className="flex items-start gap-3 rounded-2xl border border-amber-100 bg-amber-50/80 p-4 text-sm text-amber-900">
         <XCircle className="mt-0.5 h-4 w-4 shrink-0" />
         <p>{NOTE_BOX}</p>
       </div>
+      ) : null}
     </div>
   );
 }

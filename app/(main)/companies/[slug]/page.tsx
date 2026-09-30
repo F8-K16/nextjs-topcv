@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { MapPin, Globe, Building2, ExternalLink } from "lucide-react";
 import type { Company } from "@/app/types/company.type";
 import type { Job } from "@/app/types/job.type";
@@ -17,32 +17,35 @@ type CompanyPublic = Company & {
   jobs: Job[];
 };
 
-async function getCompany(id: number): Promise<CompanyPublic | null> {
+async function getCompany(key: string): Promise<CompanyPublic | null> {
   const base = API_BASE_URL;
-  if (!base || Number.isNaN(id)) return null;
-  const res = await fetch(`${base}/companies/${id}`, {
+  const slug = key.trim();
+  if (!base || !slug) return null;
+  const res = await fetch(`${base}/companies/${encodeURIComponent(slug)}`, {
     ...nextFetchCache.companyDetail,
   });
   if (res.status === 404 || !res.ok) return null;
   return res.json() as Promise<CompanyPublic>;
 }
 
-type Props = { params: Promise<{ id: string }> };
+type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id: idParam } = await params;
-  const id = Number(idParam);
-  if (Number.isNaN(id)) return { title: "Công ty" };
-  const company = await getCompany(id);
+  const { slug } = await params;
+  const company = await getCompany(slug);
   if (!company) return { title: "Công ty" };
   return { title: company.name };
 }
 
 export default async function CompanyDetailPage({ params }: Props) {
-  const { id: idParam } = await params;
-  const company = await getCompany(Number(idParam));
+  const { slug } = await params;
+  const company = await getCompany(slug);
 
   if (!company) notFound();
+
+  if (company.slug && company.slug !== slug) {
+    redirect(`/companies/${company.slug}`);
+  }
 
   const website = company.website?.trim();
 

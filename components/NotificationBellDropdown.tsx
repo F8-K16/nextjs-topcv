@@ -26,7 +26,7 @@ type Props = {
 
 export default function NotificationBellDropdown({
   variant,
-  className = "relative flex h-10 w-10 items-center justify-center rounded-xl text-gray-600 transition hover:bg-gray-100 hover:text-[#00b14f]",
+  className = "relative flex h-10 w-10 items-center justify-center rounded-xl text-gray-600 transition hover:bg-gray-100 hover:text-[#00b14f] dark:text-zinc-300 dark:hover:bg-white/10 dark:hover:text-emerald-400",
   iconClassName = "h-[22px] w-[22px]",
 }: Props) {
   const router = useRouter();
@@ -109,7 +109,6 @@ export default function NotificationBellDropdown({
   if (!isAuthenticated) return null;
 
   const items = preview?.notifications ?? [];
-  const isAdminPanel = variant === "admin";
 
   return (
     <div className="relative" ref={wrapRef}>
@@ -137,27 +136,15 @@ export default function NotificationBellDropdown({
       {open ? (
         <div
           style={panelStyle}
-          className={`flex min-h-0 max-w-[calc(100vw-1.5rem)] flex-col overflow-hidden rounded-xl border shadow-xl ${
-            isAdminPanel
-              ? "border-zinc-200 bg-white text-zinc-900 shadow-zinc-900/10 dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-100 dark:shadow-black/40"
-              : "border-zinc-200 bg-white text-zinc-900 shadow-zinc-200/50"
-          }`}
+          className="flex min-h-0 max-w-[calc(100vw-1.5rem)] flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white text-zinc-900 shadow-xl shadow-zinc-900/10 dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-100 dark:shadow-black/40"
         >
           <div
-            className={`flex shrink-0 items-center justify-between border-b px-3 py-2 text-xs font-semibold ${
-              isAdminPanel
-                ? "border-zinc-100 text-zinc-600 dark:border-white/10 dark:text-zinc-300"
-                : "border-zinc-100 text-zinc-600"
-            }`}
+            className="flex shrink-0 items-center justify-between border-b border-zinc-100 px-3 py-2 text-xs font-semibold text-zinc-600 dark:border-white/10 dark:text-zinc-300"
           >
             <span>Thông báo</span>
             <Link
               href={basePath}
-              className={
-                isAdminPanel
-                  ? "text-[#00b14f] hover:underline dark:text-emerald-400"
-                  : "text-[#00b14f] hover:underline"
-              }
+              className="text-[#00b14f] hover:underline dark:text-emerald-400"
               onClick={() => closePanel()}
             >
               Xem tất cả
@@ -176,47 +163,46 @@ export default function NotificationBellDropdown({
               </p>
             ) : (
               <ul
-                className={`divide-y ${isAdminPanel ? "divide-zinc-100 dark:divide-white/10" : "divide-zinc-100"}`}
+                className="divide-y divide-zinc-100 dark:divide-white/10"
               >
                 {items.map((n) => {
                   const unread = !n.readAt;
+                  const timeLabel = formatNotificationTime(n.createdAt);
                   return (
                     <li key={n.id}>
                       <button
                         type="button"
                         onClick={() => goToDetail(n.id)}
                         className={`flex w-full gap-2 px-3 py-2.5 text-left text-sm transition ${
-                          isAdminPanel
-                            ? unread
-                              ? "bg-[#00b14f]/5 hover:bg-zinc-100 dark:bg-white/5 dark:hover:bg-white/10"
-                              : "hover:bg-zinc-50 dark:hover:bg-white/5"
-                            : unread
-                              ? "bg-[#00b14f]/5 hover:bg-[#00b14f]/10"
-                              : "hover:bg-zinc-50"
+                          unread
+                            ? "bg-[#00b14f]/5 hover:bg-zinc-100 dark:bg-white/5 dark:hover:bg-white/10"
+                            : "hover:bg-zinc-50 dark:hover:bg-white/5"
                         }`}
                       >
                         {unread ? (
                           <span
-                            className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${
-                              isAdminPanel
-                                ? "bg-[#00b14f] dark:bg-emerald-400"
-                                : "bg-[#00b14f]"
-                            }`}
+                            className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#00b14f] dark:bg-emerald-400"
                           />
                         ) : (
                           <span className="mt-1.5 h-2 w-2 shrink-0" />
                         )}
                         <span className="min-w-0 flex-1">
-                          <span className="line-clamp-2 font-medium leading-snug">
-                            {n.title}
+                          <span className="flex items-start justify-between gap-2">
+                            <span className="line-clamp-2 font-medium leading-snug">
+                              {n.title}
+                            </span>
+                            {timeLabel ? (
+                              <time
+                                dateTime={n.createdAt}
+                                className="shrink-0 pt-0.5 text-[11px] font-normal tabular-nums text-zinc-400 dark:text-zinc-500"
+                              >
+                                {timeLabel}
+                              </time>
+                            ) : null}
                           </span>
                           {n.body ? (
                             <span
-                              className={`mt-0.5 line-clamp-2 text-xs ${
-                                isAdminPanel
-                                  ? "text-zinc-500 dark:text-zinc-400"
-                                  : "text-zinc-500"
-                              }`}
+                              className="mt-0.5 line-clamp-2 text-xs text-zinc-500 dark:text-zinc-400"
                             >
                               {n.body}
                             </span>
@@ -233,4 +219,29 @@ export default function NotificationBellDropdown({
       ) : null}
     </div>
   );
+}
+
+function formatNotificationTime(iso: string) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const diff = Date.now() - d.getTime();
+  const minute = 60_000;
+  const hour = 60 * minute;
+  const day = 24 * hour;
+  if (diff < minute) return "Vừa xong";
+  if (diff < hour) return `${Math.floor(diff / minute)} phút trước`;
+  if (diff < day) return `${Math.floor(diff / hour)} giờ trước`;
+  if (diff < 7 * day) return `${Math.floor(diff / day)} ngày trước`;
+  try {
+    return new Intl.DateTimeFormat("vi-VN", {
+      timeZone: "Asia/Ho_Chi_Minh",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(d);
+  } catch {
+    return iso;
+  }
 }

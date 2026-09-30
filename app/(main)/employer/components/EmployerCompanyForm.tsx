@@ -20,6 +20,7 @@ import { applyFieldErrorsToForm, resolveSubmitError } from "@/lib/submit-error";
 import { STALE_EMPLOYER_FORM_META_MS } from "@/lib/query-stale-time";
 import { useAuthStore } from "@/app/stores/auth.store";
 import Image from "next/image";
+import OptionSelect from "@/components/ui/option-select";
 
 export default function EmployerCompanyForm({
   variant = "page",
@@ -176,9 +177,9 @@ export default function EmployerCompanyForm({
           {"Giới thiệu"}
         </label>
         <textarea
-          rows={isPage ? 9 : 4}
+          rows={4}
           {...register("description")}
-          className={`${inputClass} ${isPage ? "min-h-52 resize-y" : ""}`}
+          className={`${inputClass} resize-y`}
         />
       </div>
 
@@ -217,22 +218,19 @@ export default function EmployerCompanyForm({
             control={control}
             name="provinceId"
             render={({ field }) => (
-              <select
-                className={inputClass}
-                value={field.value > 0 ? field.value : ""}
-                onChange={(e) => {
-                  const v = e.target.value ? Number(e.target.value) : 0;
-                  field.onChange(v);
+              <OptionSelect
+                ariaLabel="Tỉnh / Thành"
+                placeholder="Chọn tỉnh / thành"
+                value={field.value > 0 ? String(field.value) : ""}
+                options={provinces.map((province) => ({
+                  value: String(province.id),
+                  label: province.name,
+                }))}
+                onChange={(next) => {
+                  field.onChange(next ? Number(next) : 0);
                   setValue("districtId", 0, { shouldValidate: false });
                 }}
-              >
-                <option value="">{"-- Chọn --"}</option>
-                {provinces.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
+              />
             )}
           />
           {errors.provinceId && (
@@ -250,29 +248,22 @@ export default function EmployerCompanyForm({
             control={control}
             name="districtId"
             render={({ field }) => (
-              <select
-                className={inputClass}
+              <OptionSelect
+                ariaLabel="Quận / Huyện"
+                placeholder={loadingDistrict ? "Đang tải…" : "Chọn quận / huyện"}
                 disabled={
                   !provinceId ||
                   provinceId < 1 ||
                   loadingDistrict ||
                   districts.length === 0
                 }
-                value={field.value > 0 ? field.value : ""}
-                onChange={(e) => {
-                  const v = e.target.value ? Number(e.target.value) : 0;
-                  field.onChange(v);
-                }}
-              >
-                <option value="">
-                  {loadingDistrict ? "Đang tải…" : "-- Chọn --"}
-                </option>
-                {districts.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name}
-                  </option>
-                ))}
-              </select>
+                value={field.value > 0 ? String(field.value) : ""}
+                options={districts.map((district) => ({
+                  value: String(district.id),
+                  label: district.name,
+                }))}
+                onChange={(next) => field.onChange(next ? Number(next) : 0)}
+              />
             )}
           />
           {errors.districtId && (
@@ -290,29 +281,24 @@ export default function EmployerCompanyForm({
         <label className="mb-1 block text-sm font-medium text-zinc-700">
           {"Logo công ty"}
         </label>
-        <p className="mb-2 text-xs text-zinc-500">
-          {
-            "JPG, PNG hoặc WEBP. Hình vuông sẽ đẹp nhất (cùng cấu hình ảnh đại diện)."
-          }
-        </p>
         <input type="hidden" {...register("logo")} />
-        <div className="flex flex-col items-start gap-4 rounded-xl border border-dashed border-zinc-200 bg-linear-to-b from-zinc-50 to-white p-4 sm:flex-row sm:items-center">
+        <div className="flex items-center gap-3 rounded-xl border border-dashed border-zinc-200 bg-zinc-50/70 p-3 dark:bg-white/5">
           <div className="group relative shrink-0">
             <Image
               src={logoPreview || "/images/logo-default.png"}
               alt=""
-              width={96}
-              height={96}
-              className="h-24 w-24 rounded-xl border border-zinc-200 object-contain"
+              width={64}
+              height={64}
+              className="logo-plate h-16 w-16 rounded-lg border border-zinc-200 bg-white object-contain"
             />
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-xl bg-black/35 opacity-0 transition group-hover:opacity-100">
-              <Camera className="h-6 w-6 text-white" />
+              <Camera className="h-5 w-5 text-white" />
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <UploadButton
               signatureEndpoint="/api/sign-cloudinary-params"
-              className="cursor-pointer rounded-full bg-primary px-4 py-2 text-sm font-medium text-white hover:opacity-95"
+              className="cursor-pointer rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-white hover:opacity-95"
               uploadPreset="F8_TopCV"
               options={{ tags: ["company-logo"] }}
               onSuccess={(results: CloudinaryUploadWidgetResults) => {
@@ -332,7 +318,7 @@ export default function EmployerCompanyForm({
             {logoPreview?.trim() ? (
               <button
                 type="button"
-                className="rounded-full border border-zinc-300 px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50"
+                className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs text-zinc-700 hover:bg-zinc-50"
                 onClick={() =>
                   setValue("logo", "", {
                     shouldDirty: true,
@@ -352,42 +338,23 @@ export default function EmployerCompanyForm({
   );
 
   const companyCategoriesFields = (
-      <div
-        className={
-          isPage ? "flex min-h-0 flex-1 flex-col" : "space-y-2"
-        }
-      >
+      <div className="space-y-2">
         <p className="mb-2 shrink-0 text-sm font-medium text-zinc-700">
-          {"Danh mục ngành của công ty"}
+          {"Danh mục ngành"}
           <span className="text-red-500"> *</span>
         </p>
-        <p className="mb-2 shrink-0 text-xs text-zinc-500">
-          {
-            "Chọn ít nhất một mục. Các danh mục này dùng để đăng tin việc làm thuộc đúng ngành công ty."
-          }
-        </p>
         <div
-          className={`employer-category-scroll custom-scrollbar overscroll-y-contain overflow-y-auto rounded-xl border border-zinc-200 bg-white/90 p-2 pr-1.5 shadow-inner [scrollbar-gutter:stable] ${
-            isPage
-              ? "min-h-0 flex-1 lg:max-h-none"
-              : "max-h-64"
-          }`}
+          className="employer-category-scroll custom-scrollbar max-h-52 overscroll-y-contain overflow-y-auto rounded-xl border border-zinc-200 bg-white/90 p-2 pr-1.5 [scrollbar-gutter:stable]"
         >
-          <div
-            className={
-              isPage
-                ? "flex flex-col gap-2"
-                : "grid gap-2 sm:grid-cols-2"
-            }
-          >
+          <div className="grid gap-1.5 sm:grid-cols-2">
             {allCategories.map((c) => (
               <label
                 key={c.id}
-                className="flex cursor-pointer items-start gap-3 rounded-lg border border-zinc-100 bg-zinc-50/90 px-3 py-2.5 text-sm transition hover:border-primary/30 hover:bg-white"
+                className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition hover:bg-zinc-50"
               >
                 <input
                   type="checkbox"
-                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-zinc-300 text-primary focus:ring-2 focus:ring-primary/25"
+                  className="h-4 w-4 shrink-0 rounded border-zinc-300 text-primary focus:ring-2 focus:ring-primary/25"
                   checked={categoryIds.includes(c.id)}
                   onChange={() => toggleCategory(c.id)}
                 />
@@ -431,19 +398,17 @@ export default function EmployerCompanyForm({
       )}
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className={isPage ? "w-full space-y-6" : "max-w-3xl space-y-4"}
+        className="max-w-3xl space-y-4"
       >
         <fieldset
           disabled={companyLocked}
           className="space-y-4 border-0 p-0 disabled:opacity-60"
         >
           {isPage ? (
-            <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_min(26rem,100%)] lg:items-stretch xl:grid-cols-[minmax(0,1fr)_min(30rem,38%)]">
-              <div className="min-w-0 space-y-4">{companyCoreFields}</div>
-              <div className="flex min-h-0 min-w-0 flex-col gap-4 rounded-2xl border border-zinc-200/80 bg-zinc-50/40 p-4 lg:h-full lg:min-h-0 lg:bg-white lg:p-5 lg:shadow-sm lg:ring-1 lg:ring-zinc-100">
-                {companyLogoFields}
-                {companyCategoriesFields}
-              </div>
+            <div className="space-y-4">
+              {companyLogoFields}
+              {companyCoreFields}
+              {companyCategoriesFields}
             </div>
           ) : (
             <div className="space-y-4">
@@ -455,7 +420,7 @@ export default function EmployerCompanyForm({
           <button
             type="submit"
             disabled={isSubmitting || companyLocked}
-            className="rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-95 disabled:opacity-50 cursor-pointer"
+            className="cursor-pointer rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95 disabled:opacity-50"
           >
             Lưu thông tin công ty
           </button>

@@ -13,7 +13,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { API_BASE_URL } from "@/lib/api-base-url";
 import { cn } from "@/lib/utils";
-import { adminBorderSubtle, adminSurfaceCardBlur } from "@/lib/admin-ui";
+import {
+  adminBorderSubtle,
+  adminPageTitle,
+  adminSurfaceCardBlur,
+} from "@/lib/admin-ui";
 
 export const metadata: Metadata = {
   title: "Chi tiết tin tuyển dụng",
@@ -65,7 +69,7 @@ export default async function AdminJobDetailPage({
 
       <div className={cn(adminSurfaceCardBlur, "p-6 shadow-xl")}>
         <div className="flex flex-wrap items-start gap-4">
-          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-white/10 dark:bg-zinc-800">
+          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-white/15">
             <Image
               src={job.company.logo || "/images/logo-default.png"}
               alt=""
@@ -74,9 +78,7 @@ export default async function AdminJobDetailPage({
             />
           </div>
           <div className="min-w-0 flex-1">
-            <h1 className="text-xl font-semibold text-zinc-900 dark:text-white">
-              {job.title}
-            </h1>
+            <h1 className={adminPageTitle}>{job.title}</h1>
             <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">ID #{job.id}</p>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <span

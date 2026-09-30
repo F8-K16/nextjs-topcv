@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { Plus, Search } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -19,10 +20,14 @@ import { formatCurrency, parseCurrency } from "@/utils/helper";
 import type { Job } from "@/app/types/job.type";
 import {
   applyFieldErrorsToForm,
+  getErrorToastMessage,
   resolveSubmitError,
 } from "@/lib/submit-error";
 import { STALE_EMPLOYER_FORM_META_MS } from "@/lib/query-stale-time";
 import { useAuthStore } from "@/app/stores/auth.store";
+import { useDebounce } from "@/hooks/use-debounce";
+import { cn } from "@/lib/utils";
+import OptionSelect from "@/components/ui/option-select";
 
 function toDatetimeLocal(iso?: string | null) {
   if (!iso) return "";
@@ -74,6 +79,11 @@ export default function EmployerJobForm({
   });
 
   const skillIds = useWatch({ control, name: "skillIds" }) ?? [];
+  const [skillSearch, setSkillSearch] = useState("");
+  const [extraSkills, setExtraSkills] = useState<
+    { id: number; name: string }[]
+  >([]);
+  const debouncedSkillSearch = useDebounce(skillSearch, 250);
 
   useEffect(() => {
     if (mode !== "edit" || !initialJob) return;
@@ -93,7 +103,73 @@ export default function EmployerJobForm({
   }, [mode, initialJob, reset]);
 
   const categories = meta?.categories ?? [];
-  const skills = meta?.skills ?? [];
+  const skills = useMemo(() => {
+    const map = new Map<number, { id: number; name: string }>();
+    for (const skill of meta?.skills ?? []) map.set(skill.id, skill);
+    for (const skill of extraSkills) map.set(skill.id, skill);
+    return Array.from(map.values()).sort((a, b) =>
+      a.name.localeCompare(b.name, "vi"),
+    );
+  }, [meta?.skills, extraSkills]);
+
+  const { data: searchedSkills } = useQuery({
+    queryKey: ["employer-portal-skills", userId, debouncedSkillSearch],
+    queryFn: () => employerPortalService.listSkills(debouncedSkillSearch),
+    enabled: userId != null && debouncedSkillSearch.trim().length > 0,
+    staleTime: 30_000,
+  });
+
+  const visibleSkills = useMemo(() => {
+    const q = skillSearch.trim().toLowerCase();
+    if (!q) return skills;
+    const fromSearch = searchedSkills?.skills ?? [];
+    const map = new Map<number, { id: number; name: string }>();
+    for (const skill of skills) {
+      if (skill.name.toLowerCase().includes(q)) map.set(skill.id, skill);
+    }
+    for (const skill of fromSearch) map.set(skill.id, skill);
+    return Array.from(map.values()).sort((a, b) =>
+      a.name.localeCompare(b.name, "vi"),
+    );
+  }, [skillSearch, skills, searchedSkills]);
+
+  const exactSkillMatch = useMemo(() => {
+    const q = skillSearch.trim().toLowerCase();
+    if (!q) return null;
+    return (
+      visibleSkills.find((skill) => skill.name.toLowerCase() === q) ?? null
+    );
+  }, [skillSearch, visibleSkills]);
+
+  const canCreateSkill =
+    skillSearch.trim().length > 0 && exactSkillMatch == null;
+
+  const createSkillMut = useMutation({
+    mutationFn: (name: string) => employerPortalService.createSkill(name),
+    onSuccess: async (skill) => {
+      setExtraSkills((prev) =>
+        prev.some((item) => item.id === skill.id) ? prev : [...prev, skill],
+      );
+      if (!skillIds.includes(skill.id)) {
+        setValue("skillIds", [...skillIds, skill.id], {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
+      }
+      setSkillSearch("");
+      toast.success(`Đã thêm kỹ năng "${skill.name}"`);
+      await queryClient.invalidateQueries({
+        queryKey: ["employer-form-meta"],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["employer-portal-skills"],
+      });
+    },
+    onError: (error) => {
+      toast.error(getErrorToastMessage(error) || "Không tạo được kỹ năng");
+    },
+  });
+
   const canSubmitCreate = mode !== "create" || categories.length > 0;
   const companyLocked = meta?.company?.status === false;
 
@@ -210,19 +286,24 @@ export default function EmployerJobForm({
         <label className="mb-1 block text-sm font-medium text-zinc-700">
           {"Danh mục"}
         </label>
-        <select
-          {...register("categoryId", {
-            setValueAs: (v) => (v === "" || v == null ? undefined : Number(v)),
-          })}
-          className={inputClass}
-        >
-          <option value="">{"-- Chọn --"}</option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
+        <Controller
+          control={control}
+          name="categoryId"
+          render={({ field }) => (
+            <OptionSelect
+              ariaLabel="Danh mục"
+              placeholder="-- Chọn --"
+              value={field.value ? String(field.value) : ""}
+              options={categories.map((c) => ({
+                value: String(c.id),
+                label: c.name,
+              }))}
+              onChange={(next) =>
+                field.onChange(next ? Number(next) : undefined)
+              }
+            />
+          )}
+        />
         {errors.categoryId && (
           <p className="mt-1 text-sm text-red-600">
             {errors.categoryId.message as string}
@@ -235,25 +316,45 @@ export default function EmployerJobForm({
           <label className="mb-1 block text-sm font-medium text-zinc-700">
             {"Hình thức"}
           </label>
-          <select {...register("jobType")} className={inputClass}>
-            {JOB_TYPE_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
+          <Controller
+            control={control}
+            name="jobType"
+            render={({ field }) => (
+              <OptionSelect
+                ariaLabel="Hình thức"
+                allowClear={false}
+                placeholder="Chọn hình thức"
+                value={field.value ?? ""}
+                options={JOB_TYPE_OPTIONS.map((o) => ({
+                  value: o.value,
+                  label: o.label,
+                }))}
+                onChange={field.onChange}
+              />
+            )}
+          />
         </div>
         <div>
           <label className="mb-1 block text-sm font-medium text-zinc-700">
             {"Kinh nghiệm"}
           </label>
-          <select {...register("experienceLevel")} className={inputClass}>
-            {EXPERIENCE_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
+          <Controller
+            control={control}
+            name="experienceLevel"
+            render={({ field }) => (
+              <OptionSelect
+                ariaLabel="Kinh nghiệm"
+                allowClear={false}
+                placeholder="Chọn kinh nghiệm"
+                value={field.value ?? ""}
+                options={EXPERIENCE_OPTIONS.map((o) => ({
+                  value: o.value,
+                  label: o.label,
+                }))}
+                onChange={field.onChange}
+              />
+            )}
+          />
         </div>
       </div>
 
@@ -322,22 +423,84 @@ export default function EmployerJobForm({
       </div>
 
       <div>
-        <p className="mb-2 text-sm font-medium text-zinc-700">
-          {"Kỹ năng"}
-        </p>
-        <div className="max-h-48 overflow-y-auto rounded-xl border border-zinc-200 p-3">
-          <div className="grid gap-2 sm:grid-cols-2">
-            {skills.map((s) => (
-              <label key={s.id} className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={skillIds.includes(s.id)}
-                  onChange={() => toggleSkill(s.id)}
-                />
-                {s.name}
-              </label>
-            ))}
+        <p className="mb-2 text-sm font-medium text-zinc-700">{"Kỹ năng"}</p>
+        <div className="space-y-3 rounded-xl border border-zinc-200 bg-white p-3">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+            <input
+              type="search"
+              value={skillSearch}
+              onChange={(e) => setSkillSearch(e.target.value)}
+              placeholder="Tìm kỹ năng…"
+              className="w-full rounded-xl border border-zinc-200 bg-white py-2.5 pl-10 pr-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
           </div>
+
+          {skillIds.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {skills
+                .filter((skill) => skillIds.includes(skill.id))
+                .map((skill) => (
+                  <button
+                    key={skill.id}
+                    type="button"
+                    onClick={() => toggleSkill(skill.id)}
+                    className="inline-flex items-center rounded-full bg-[#00b14f]/10 px-2.5 py-1 text-xs font-semibold text-[#087a38] hover:bg-[#00b14f]/15"
+                  >
+                    {skill.name}
+                    <span className="ml-1.5 text-[#087a38]/70">×</span>
+                  </button>
+                ))}
+            </div>
+          ) : null}
+
+          <div className="max-h-48 overflow-y-auto rounded-xl border border-zinc-100 bg-zinc-50/60 p-2">
+            {visibleSkills.length === 0 ? (
+              <p className="px-2 py-6 text-center text-sm text-zinc-500">
+                {skillSearch.trim()
+                  ? "Không tìm thấy kỹ năng phù hợp."
+                  : "Chưa có kỹ năng."}
+              </p>
+            ) : (
+              <div className="grid gap-1 sm:grid-cols-2">
+                {visibleSkills.map((s) => {
+                  const active = skillIds.includes(s.id);
+                  return (
+                    <label
+                      key={s.id}
+                      className={cn(
+                        "flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition",
+                        active
+                          ? "bg-[#00b14f]/10 text-[#087a38]"
+                          : "text-zinc-800 hover:bg-white",
+                      )}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={active}
+                        onChange={() => toggleSkill(s.id)}
+                      />
+                      <span className="min-w-0 flex-1 truncate">{s.name}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {canCreateSkill ? (
+            <button
+              type="button"
+              disabled={createSkillMut.isPending || companyLocked}
+              onClick={() => createSkillMut.mutate(skillSearch.trim())}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[#00b14f]/40 bg-[#00b14f]/5 px-3 py-2.5 text-sm font-semibold text-[#087a38] transition hover:bg-[#00b14f]/10 disabled:opacity-50"
+            >
+              <Plus className="h-4 w-4" />
+              {createSkillMut.isPending
+                ? "Đang tạo…"
+                : `Tạo kỹ năng “${skillSearch.trim()}”`}
+            </button>
+          ) : null}
         </div>
       </div>
 

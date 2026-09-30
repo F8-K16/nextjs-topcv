@@ -1,20 +1,28 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FilePenLine, Loader2, Plus, Trash2 } from "lucide-react";
+import { FilePenLine, ImagePlus, Loader2, Plus, Trash2 } from "lucide-react";
+import type { CloudinaryUploadWidgetResults } from "next-cloudinary";
 import { toast } from "sonner";
+
+import UploadButton from "@/components/UploadButton";
 
 import { cvService } from "@/services/cv.service";
 import type { CvTemplate } from "@/app/types/cv.type";
 import { cn } from "@/lib/utils";
 import {
   ADMIN_ADD_NEW_BUTTON,
+  ADMIN_PAGE_STACK,
   adminInput,
   adminSurfaceCardBlur,
+  adminTable,
   adminTableDivide,
   adminTableHeadRow,
 } from "@/lib/admin-ui";
+import { AdminPageHeader } from "@/components/admin/admin-page-header";
+import { AdminStatusChip } from "@/components/admin/admin-status-chip";
 import { getErrorToastMessage } from "@/lib/submit-error";
 import AdminPagination from "@/components/admin/AdminPagination";
 
@@ -22,7 +30,7 @@ type FormState = {
   name: string;
   description: string;
   thumbnailUrl: string;
-  isActive: boolean;
+  status: boolean;
   templateDataText: string;
 };
 
@@ -41,7 +49,7 @@ const toFormState = (template?: CvTemplate): FormState => ({
   name: template?.name ?? "",
   description: template?.description ?? "",
   thumbnailUrl: template?.thumbnailUrl ?? "",
-  isActive: template?.isActive ?? true,
+  status: template?.status ?? true,
   templateDataText: JSON.stringify(
     template?.templateData ?? JSON.parse(emptyTemplateData),
     null,
@@ -95,7 +103,7 @@ export default function CvTemplatesAdminTable() {
         name: form.name.trim(),
         description: form.description.trim() || null,
         thumbnailUrl: form.thumbnailUrl.trim() || null,
-        isActive: form.isActive,
+        status: form.status,
         templateData: parsed,
       };
 
@@ -141,20 +149,21 @@ export default function CvTemplatesAdminTable() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="mt-4 mb-4 flex items-center justify-between gap-3">
-        <h2 className="text-xl font-semibold text-zinc-900 dark:text-white">
-          Quản lý mẫu CV
-        </h2>
-        <button
-          type="button"
-          onClick={openCreate}
-          className={ADMIN_ADD_NEW_BUTTON}
-        >
-          <Plus size={18} />
-          Tạo mẫu CV
-        </button>
-      </div>
+    <div className={ADMIN_PAGE_STACK}>
+      <AdminPageHeader
+        title="Quản lý mẫu CV"
+        description="Tạo và chỉnh mẫu dùng trong trình soạn thảo CV."
+        actions={
+          <button
+            type="button"
+            onClick={openCreate}
+            className={ADMIN_ADD_NEW_BUTTON}
+          >
+            <Plus size={14} />
+            Tạo mẫu CV
+          </button>
+        }
+      />
 
       {isLoading ? (
         <div className="flex justify-center py-16">
@@ -172,7 +181,7 @@ export default function CvTemplatesAdminTable() {
       ) : (
         <div className={cn(adminSurfaceCardBlur, "overflow-hidden p-0")}>
           <div className="overflow-x-auto">
-            <table className={cn("min-w-full", adminTableDivide)}>
+            <table className={cn(adminTable, adminTableDivide)}>
               <thead>
                 <tr className={cn(adminTableHeadRow, "uppercase")}>
                   <th className="px-4 py-2">Tên mẫu</th>
@@ -195,15 +204,11 @@ export default function CvTemplatesAdminTable() {
                       {template.description || "—"}
                     </td>
                     <td className="px-4 py-3 text-sm">
-                      <span
-                        className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-                          template.isActive
-                            ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300"
-                            : "bg-zinc-100 text-zinc-700 dark:bg-zinc-500/20 dark:text-zinc-300"
-                        }`}
+                      <AdminStatusChip
+                        tone={template.status ? "success" : "neutral"}
                       >
-                        {template.isActive ? "Đang dùng" : "Ẩn"}
-                      </span>
+                        {template.status ? "Dùng" : "Ẩn"}
+                      </AdminStatusChip>
                     </td>
                     <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
                       {template.updatedAt
@@ -251,21 +256,67 @@ export default function CvTemplatesAdminTable() {
             {editing ? "Cập nhật mẫu CV" : "Tạo mẫu CV mới"}
           </h3>
 
-          <div className="grid gap-3 md:grid-cols-2">
-            <input
-              value={form.name}
-              onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-              placeholder="Tên mẫu"
-              className={adminInput}
-            />
-            <input
-              value={form.thumbnailUrl}
-              onChange={(e) =>
-                setForm((prev) => ({ ...prev, thumbnailUrl: e.target.value }))
-              }
-              placeholder="Thumbnail URL"
-              className={adminInput}
-            />
+          <input
+            value={form.name}
+            onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+            placeholder="Tên mẫu"
+            className={adminInput}
+          />
+          <div className="mt-3 rounded-xl border border-dashed border-zinc-300 bg-zinc-50/80 p-4 dark:border-white/15 dark:bg-white/5">
+            <p className="text-sm font-medium text-zinc-800 dark:text-zinc-100">
+              Ảnh thumbnail
+            </p>
+            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+              JPG, PNG hoặc WEBP. Ảnh này hiện trên danh sách mẫu CV.
+            </p>
+            <div className="mt-3 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+              <div className="relative h-28 w-40 overflow-hidden rounded-lg border border-zinc-200 bg-white dark:border-white/10 dark:bg-black/30">
+                {form.thumbnailUrl ? (
+                  <Image
+                    src={form.thumbnailUrl}
+                    alt="Ảnh thumbnail mẫu CV"
+                    fill
+                    sizes="160px"
+                    className="object-contain"
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-zinc-400">
+                    <ImagePlus className="h-8 w-8" />
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <UploadButton
+                  signatureEndpoint="/api/sign-cloudinary-params"
+                  className="cursor-pointer rounded-full bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-500"
+                  uploadPreset="F8_TopCV"
+                  options={{ tags: ["cv-template-thumbnail"] }}
+                  onSuccess={(results: CloudinaryUploadWidgetResults) => {
+                    const info = results?.info;
+                    const url =
+                      typeof info === "object" && info !== null
+                        ? info.secure_url
+                        : undefined;
+                    if (url) {
+                      setForm((prev) => ({ ...prev, thumbnailUrl: url }));
+                    }
+                  }}
+                >
+                  Tải ảnh lên
+                </UploadButton>
+                {form.thumbnailUrl ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setForm((prev) => ({ ...prev, thumbnailUrl: "" }))
+                    }
+                    className="rounded-full border border-zinc-300 px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-100 dark:border-white/15 dark:text-zinc-200 dark:hover:bg-white/10"
+                  >
+                    Xóa ảnh
+                  </button>
+                ) : null}
+              </div>
+            </div>
           </div>
           <input
             value={form.description}
@@ -278,9 +329,9 @@ export default function CvTemplatesAdminTable() {
           <label className="mt-3 inline-flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
             <input
               type="checkbox"
-              checked={form.isActive}
+              checked={form.status}
               onChange={(e) =>
-                setForm((prev) => ({ ...prev, isActive: e.target.checked }))
+                setForm((prev) => ({ ...prev, status: e.target.checked }))
               }
             />
             Kích hoạt mẫu

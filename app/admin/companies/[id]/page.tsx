@@ -9,6 +9,7 @@ import { notFound } from "next/navigation";
 import { API_BASE_URL } from "@/lib/api-base-url";
 import {
   adminBorderSubtle,
+  adminPageTitle,
   adminSectionTitle,
   adminSurfaceCardBlur,
 } from "@/lib/admin-ui";
@@ -91,9 +92,7 @@ export default async function AdminCompanyDetailPage({
             />
           </div>
           <div className="min-w-0 flex-1">
-            <h1 className="text-xl font-semibold text-zinc-900 dark:text-white">
-              {company.name}
-            </h1>
+            <h1 className={adminPageTitle}>{company.name}</h1>
             <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
               ID #{company.id}
             </p>

@@ -3,6 +3,7 @@
 import { loginSchema } from "@/app/validations/auth.schema";
 import { authService } from "@/services/auth.service";
 import { cookies } from "next/headers";
+import { decodeToken } from "@/utils/jwt";
 
 import type { User } from "@/app/stores/auth.store";
 
@@ -16,7 +17,11 @@ const cookieBase = {
 
 export type LoginState = {
   success?: boolean;
+  roles?: string[];
   error?: string;
+  twoFactorRequired?: boolean;
+  twoFactorSetupRequired?: boolean;
+  challengeToken?: string;
   fieldErrors?: {
     email?: string[];
     password?: string[];
@@ -49,13 +54,39 @@ export async function loginAction(
     };
   }
 
+  if (res.data.twoFactorRequired && res.data.challengeToken) {
+    return {
+      twoFactorRequired: true,
+      challengeToken: res.data.challengeToken,
+    };
+  }
+
   const cookieStore = await cookies();
   cookieStore.set("accessToken", res.data.accessToken, cookieBase);
   cookieStore.set("refreshToken", res.data.refreshToken, cookieBase);
 
+  const roles = decodeToken(res.data.accessToken)?.roles ?? [];
+
   return {
     success: true,
+    roles,
+    twoFactorSetupRequired: Boolean(res.data.twoFactorSetupRequired),
   };
+}
+
+export async function verifyTwoFactorAction(input: {
+  challengeToken: string;
+  code: string;
+}): Promise<LoginState> {
+  const res = await authService.verifyAdminTotp(input);
+  if (!res.success || !res.data?.accessToken || !res.data.refreshToken) {
+    return { error: res.message || "Mã xác thực không đúng" };
+  }
+  const cookieStore = await cookies();
+  cookieStore.set("accessToken", res.data.accessToken, cookieBase);
+  cookieStore.set("refreshToken", res.data.refreshToken, cookieBase);
+  const roles = decodeToken(res.data.accessToken)?.roles ?? [];
+  return { success: true, roles };
 }
 
 export const verifyAction = async (email: string, code: string) => {

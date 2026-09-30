@@ -16,6 +16,7 @@ export type MyApplication = {
   resumeId: number | null;
   job: {
     id: number;
+    slug?: string | null;
     title: string;
     jobType: string;
     experienceLevel: string;

@@ -9,12 +9,22 @@ import { Category } from "@/app/types/category.type";
 import { categoryService } from "@/services/category.service";
 import {
   ADMIN_ADD_NEW_BUTTON,
+  ADMIN_PAGE_STACK,
+  ADMIN_SEARCH_ICON,
+  ADMIN_SEARCH_WRAP,
   adminSearchFieldWithIcon,
   adminSurfaceCardBlur,
+  adminTable,
   adminTableDivide,
   adminTableHeadRow,
   adminTableMuted,
 } from "@/lib/admin-ui";
+import {
+  AdminPageHeader,
+  AdminToolbar,
+  AdminToolbarRow,
+} from "@/components/admin/admin-page-header";
+import { AdminStatusChip } from "@/components/admin/admin-status-chip";
 import { cn } from "@/lib/utils";
 import AdminPagination from "@/components/admin/AdminPagination";
 import { getErrorToastMessage } from "@/lib/submit-error";
@@ -74,43 +84,42 @@ export default function CategoriesTable({
   };
 
   return (
-    <div>
-      <div className="mt-4 mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-xl font-semibold text-zinc-900 dark:text-white">
-          Danh mục việc làm
-        </h2>
+    <div className={ADMIN_PAGE_STACK}>
+      <AdminPageHeader
+        title="Danh mục việc làm"
+        description="Tổ chức ngành nghề dùng cho tin tuyển dụng và công ty."
+        actions={
+          <button
+            type="button"
+            onClick={() => openModal("create-category", undefined)}
+            className={ADMIN_ADD_NEW_BUTTON}
+          >
+            <Plus size={14} />
+            Thêm mới
+          </button>
+        }
+      />
 
-        <div className="flex flex-wrap gap-3">
-          <div className="relative min-w-50 flex-1">
+      <AdminToolbar>
+        <AdminToolbarRow>
+          <div className={ADMIN_SEARCH_WRAP}>
             <input
               onChange={handleSearch}
               defaultValue={searchParams.get("search") || ""}
               placeholder="Tìm..."
               className={adminSearchFieldWithIcon}
             />
-            <Search
-              className="pointer-events-none absolute left-3 top-2.5 text-zinc-400 dark:text-zinc-500"
-              size={18}
-            />
+            <Search className={ADMIN_SEARCH_ICON} />
           </div>
-
-          <button
-            type="button"
-            onClick={() => openModal("create-category", undefined)}
-            className={ADMIN_ADD_NEW_BUTTON}
-          >
-            <Plus size={18} />
-            Thêm mới
-          </button>
-        </div>
-      </div>
+        </AdminToolbarRow>
+      </AdminToolbar>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className={cn(adminSurfaceCardBlur, "p-6")}
       >
         <div className="overflow-x-auto">
-          <table className={cn("min-w-full", adminTableDivide)}>
+          <table className={cn(adminTable, adminTableDivide)}>
             <thead>
               <tr className={adminTableHeadRow}>
                 {["Tên", "Slug", "Việc làm", "Công ty", "Hành động"].map(
@@ -153,15 +162,15 @@ export default function CategoriesTable({
                     </td>
 
                     <td className="px-6 py-4">
-                      <span className="rounded bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-500/20 dark:text-blue-300">
+                      <AdminStatusChip tone="info">
                         {c._count?.jobs ?? 0}
-                      </span>
+                      </AdminStatusChip>
                     </td>
 
                     <td className="px-6 py-4">
-                      <span className="rounded bg-violet-100 px-2 py-1 text-sm text-violet-800 dark:bg-purple-500/20 dark:text-purple-300">
+                      <AdminStatusChip tone="violet">
                         {c._count?.companies ?? 0}
-                      </span>
+                      </AdminStatusChip>
                     </td>
 
                     <td className="px-6 py-4">

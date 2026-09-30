@@ -4,6 +4,7 @@ import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api-base-url";
 import { cn } from "@/lib/utils";
 import { adminSurfaceCardBlur } from "@/lib/admin-ui";
+import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -42,22 +43,18 @@ export default async function AuditLogDetailPage({ params }: Props) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h2 className="text-xl font-semibold text-zinc-900 dark:text-white">
-            Audit log #{log.id}
-          </h2>
-          <p className="mt-1 font-mono text-sm text-zinc-600 dark:text-zinc-400">
-            {log.action}
-          </p>
-        </div>
-        <Link
-          href="/admin/audit-logs"
-          className="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-800 shadow-sm transition hover:bg-zinc-50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10"
-        >
-          Quay lại
-        </Link>
-      </div>
+      <AdminPageHeader
+        title={`Audit log #${log.id}`}
+        description={log.action}
+        actions={
+          <Link
+            href="/admin/audit-logs"
+            className="inline-flex h-9 items-center rounded-lg border border-zinc-200 bg-white px-3 text-[12px] font-medium text-zinc-800 shadow-sm transition hover:bg-zinc-50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10"
+          >
+            Quay lại
+          </Link>
+        }
+      />
 
       <div className="grid gap-3 md:grid-cols-2">
         <div className={cn(adminSurfaceCardBlur, "p-4")}>

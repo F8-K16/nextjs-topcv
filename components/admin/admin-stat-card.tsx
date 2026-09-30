@@ -47,7 +47,7 @@ export function AdminStatCard({
       whileHover={{ y: -2, scale: 1.01 }}
       transition={{ type: "spring", stiffness: 400, damping: 28 }}
       className={cn(
-        "group relative overflow-hidden p-5 shadow-lg dark:shadow-black/30",
+        "group relative overflow-hidden p-4",
         adminSurfaceCardBlur,
       )}
     >
@@ -59,7 +59,7 @@ export function AdminStatCard({
           <p className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
             {title}
           </p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-zinc-900 dark:text-white">
+          <p className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900 dark:text-white">
             <AnimatedNumber value={value} />
           </p>
           {subtitle && (

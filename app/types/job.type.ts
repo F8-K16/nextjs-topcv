@@ -44,6 +44,7 @@ export type ExperienceLevel = (typeof EXPERIENCE_OPTIONS)[number]["value"];
 
 export type Job = {
   id: number;
+  slug?: string;
   title: string;
   description: string;
   minSalary?: number;
@@ -73,6 +74,7 @@ export type Job = {
 
   company: {
     id: number;
+    slug?: string;
     name: string;
     logo?: string;
     website?: string | null;
@@ -149,7 +151,6 @@ export type CreateJobPayload = {
 };
 
 export type SavedJob = {
-  id: number;
   candidateId: number;
   jobId: number;
   createdAt: string;

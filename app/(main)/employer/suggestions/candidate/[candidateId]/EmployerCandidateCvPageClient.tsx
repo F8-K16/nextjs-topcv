@@ -110,7 +110,7 @@ export default function EmployerCandidateCvPageClient() {
               </p>
             </div>
           ) : preview.kind === "template" ? (
-            <div className="max-h-[min(75vh,720px)] overflow-y-auto rounded-xl border border-zinc-100 bg-white p-3">
+            <div className="keep-light max-h-[min(75vh,720px)] overflow-y-auto rounded-xl border border-zinc-100 bg-white p-3">
               <CvCanvas
                 templateData={preview.cv.template.templateData}
                 content={preview.cv.content}
@@ -127,7 +127,7 @@ export default function EmployerCandidateCvPageClient() {
                 <iframe
                   title="CV ứng viên"
                   src={preview.fileUrl}
-                  className="h-[min(70vh,680px)] w-full rounded-lg bg-white"
+                  className="keep-light h-[min(70vh,680px)] w-full rounded-lg bg-white"
                 />
               </div>
             </div>

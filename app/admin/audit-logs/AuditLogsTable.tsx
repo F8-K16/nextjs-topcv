@@ -9,11 +9,18 @@ import {
   ADMIN_FILTER_LABEL,
   ADMIN_FILTER_SELECT_WIDE,
   ADMIN_NATIVE_OPTION,
+  ADMIN_PAGE_STACK,
   adminSearchField,
   adminSurfaceCardBlur,
+  adminTable,
   adminTableDivide,
   adminTableHeadRow,
 } from "@/lib/admin-ui";
+import {
+  AdminPageHeader,
+  AdminToolbar,
+} from "@/components/admin/admin-page-header";
+import { AdminStatusChip } from "@/components/admin/admin-status-chip";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -58,18 +65,13 @@ export default function AuditLogsTable({
   };
 
   return (
-    <div>
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h2 className="text-xl font-semibold text-zinc-900 dark:text-white">
-            Nhật ký kiểm toán
-          </h2>
-          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-            Theo dõi thao tác quản trị và thay đổi quan trọng trong hệ thống.
-          </p>
-        </div>
-      </div>
+    <div className={ADMIN_PAGE_STACK}>
+      <AdminPageHeader
+        title="Nhật ký kiểm toán"
+        description="Theo dõi thao tác quản trị và thay đổi quan trọng trong hệ thống."
+      />
 
+      <AdminToolbar>
       <div className={ADMIN_FILTER_GRID}>
         <div className={ADMIN_FILTER_FIELD}>
           <span className={ADMIN_FILTER_LABEL}>Action</span>
@@ -131,10 +133,11 @@ export default function AuditLogsTable({
           </select>
         </div>
       </div>
+      </AdminToolbar>
 
-      <div className={cn(adminSurfaceCardBlur, "mt-6 overflow-hidden p-0")}>
+      <div className={cn(adminSurfaceCardBlur, "overflow-hidden p-0")}>
         <div className="overflow-x-auto">
-          <table className={cn("min-w-full text-sm", adminTableDivide)}>
+          <table className={cn(adminTable, adminTableDivide)}>
             <thead>
               <tr
                 className={cn(
@@ -196,15 +199,9 @@ export default function AuditLogsTable({
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ${
-                        log.success
-                          ? "bg-emerald-100 text-emerald-800 ring-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-500/20"
-                          : "bg-rose-100 text-rose-800 ring-rose-200 dark:bg-rose-500/15 dark:text-rose-200 dark:ring-rose-500/20"
-                      }`}
-                    >
-                      {log.success ? "OK" : "FAIL"}
-                    </span>
+                    <AdminStatusChip tone={log.success ? "success" : "danger"}>
+                      {log.success ? "OK" : "Lỗi"}
+                    </AdminStatusChip>
                   </td>
                   <td className="px-4 py-3 text-xs text-zinc-500 dark:text-zinc-400">
                     {log.ip || "—"}

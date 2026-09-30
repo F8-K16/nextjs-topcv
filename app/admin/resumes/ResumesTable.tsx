@@ -7,7 +7,6 @@ import {
   Plus,
   Search,
   Trash2,
-  Upload,
   Users,
   Mail,
   Phone,
@@ -22,11 +21,21 @@ import { formatDate } from "@/utils/helper";
 import { cn } from "@/lib/utils";
 import {
   ADMIN_ADD_NEW_BUTTON,
+  ADMIN_PAGE_STACK,
+  ADMIN_SEARCH_ICON,
+  ADMIN_SEARCH_WRAP,
   adminSearchFieldWithIcon,
   adminSurfaceCardBlur,
+  adminTable,
   adminTableDivide,
   adminTableHeadRow,
 } from "@/lib/admin-ui";
+import {
+  AdminPageHeader,
+  AdminToolbar,
+  AdminToolbarRow,
+} from "@/components/admin/admin-page-header";
+import { AdminStatusChip } from "@/components/admin/admin-status-chip";
 import AdminPagination from "@/components/admin/AdminPagination";
 import { getErrorToastMessage } from "@/lib/submit-error";
 import { parseSharedCvIdFromResumeFileUrl } from "@/lib/cv-resume-url";
@@ -105,36 +114,35 @@ export default function ResumesTable({ data }: Props) {
   };
 
   return (
-    <div>
-      <div className="mt-4 mb-4 flex justify-between items-center flex-wrap gap-3">
-        <h2 className="text-xl font-semibold text-zinc-900 dark:text-white">
-          Quản lý CV
-        </h2>
+    <div className={ADMIN_PAGE_STACK}>
+      <AdminPageHeader
+        title="Quản lý CV"
+        description="Tìm kiếm hồ sơ theo tiêu đề, tên, email hoặc số điện thoại."
+        actions={
+          <button
+            type="button"
+            onClick={() => openModal("create-resume", { candidates })}
+            className={ADMIN_ADD_NEW_BUTTON}
+          >
+            <Plus size={14} />
+            Thêm mới
+          </button>
+        }
+      />
 
-        <div className="flex flex-wrap gap-3">
-          <div className="relative min-w-70 flex-1">
+      <AdminToolbar>
+        <AdminToolbarRow>
+          <div className={ADMIN_SEARCH_WRAP}>
             <input
               onChange={handleSearch}
               defaultValue={searchParams.get("search") || ""}
               placeholder="Tìm tiêu đề, Tên, Email, SĐT..."
               className={adminSearchFieldWithIcon}
             />
-            <Search
-              className="pointer-events-none absolute left-3 top-2.5 text-zinc-400 dark:text-zinc-500"
-              size={18}
-            />
+            <Search className={ADMIN_SEARCH_ICON} />
           </div>
-
-          <button
-            type="button"
-            onClick={() => openModal("create-resume", { candidates })}
-            className={ADMIN_ADD_NEW_BUTTON}
-          >
-            <Plus size={18} />
-            Thêm mới
-          </button>
-        </div>
-      </div>
+        </AdminToolbarRow>
+      </AdminToolbar>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -207,7 +215,7 @@ export default function ResumesTable({ data }: Props) {
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className={cn("min-w-full", adminTableDivide)}>
+                  <table className={cn(adminTable, adminTableDivide)}>
                     <thead>
                       <tr className={cn(adminTableHeadRow, "uppercase")}>
                         <th className="px-4 py-2">Loại</th>
@@ -235,15 +243,13 @@ export default function ResumesTable({ data }: Props) {
                           >
                             <td className="px-4 py-3">
                               {isFromTemplate ? (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300">
-                                  <LayoutTemplate className="h-3 w-3 shrink-0" />
-                                  Từ mẫu
-                                </span>
+                                <AdminStatusChip tone="success">
+                                  Mẫu
+                                </AdminStatusChip>
                               ) : (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-800 dark:bg-sky-500/15 dark:text-sky-300">
-                                  <Upload className="h-3 w-3 shrink-0" />
-                                  Tải lên
-                                </span>
+                                <AdminStatusChip tone="info">
+                                  File
+                                </AdminStatusChip>
                               )}
                             </td>
                             <td className="px-4 py-3 text-sm text-zinc-900 dark:text-white">

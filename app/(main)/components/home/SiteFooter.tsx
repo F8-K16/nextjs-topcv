@@ -42,7 +42,7 @@ function buildFooterGroups(
       {
         title: "Nhà tuyển dụng",
         links: [
-          { href: "/auth/sign-up", label: "Đăng ký doanh nghiệp" },
+          { href: "/auth/sign-up/employer", label: "Đăng ký doanh nghiệp" },
           {
             href: "/auth/login?redirect=/employer",
             label: "Đăng nhập khu vực NTD",
@@ -109,11 +109,22 @@ function buildFooterGroups(
     });
   }
 
+  const accountHref = isStaff
+    ? "/admin/profile"
+    : isEmployer
+      ? "/employer/profile"
+      : "/profile";
+  const passwordHref = isStaff
+    ? "/admin/profile/password"
+    : isEmployer
+      ? "/employer/profile/password"
+      : "/profile/password";
+
   groups.push({
     title: "Tài khoản & tin nhắn",
     links: [
-      { href: "/profile", label: "Hồ sơ cá nhân" },
-      { href: "/profile/password", label: "Đổi mật khẩu" },
+      { href: accountHref, label: "Hồ sơ cá nhân" },
+      { href: passwordHref, label: "Đổi mật khẩu" },
       { href: "/messages", label: "Tin nhắn" },
       { href: "/notifications", label: "Thông báo" },
     ],

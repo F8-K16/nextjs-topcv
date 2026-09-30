@@ -51,4 +51,19 @@ export const applicationService = {
       throw handleAxiosError(error);
     }
   },
+
+  async bulkWithdraw(ids: number[]): Promise<{
+    withdrawn: number;
+    skipped: number;
+  }> {
+    try {
+      const { data } = await axiosClient.post<{
+        success: boolean;
+        data: { withdrawn: number; skipped: number };
+      }>("/users/applications/bulk-withdraw", { ids });
+      return data.data;
+    } catch (error) {
+      throw handleAxiosError(error);
+    }
+  },
 };

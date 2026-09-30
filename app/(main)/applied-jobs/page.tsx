@@ -14,8 +14,8 @@ export default function AppliedJobsPage() {
         <header className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900">Việc làm đã ứng tuyển</h1>
           <p className="mt-1 text-sm text-gray-500">
-            Theo dõi trạng thái đơn ứng tuyển. Bạn có thể tích chọn nhiều dòng để
-            ghi nhớ (mở rộng tính năng sau).
+            Theo dõi trạng thái đơn. Chọn nhiều dòng để copy link tin hoặc rút
+            các đơn đang chờ nhà tuyển dụng xem.
           </p>
         </header>
         <AppliedJobsClient />

@@ -24,15 +24,25 @@ import { cn } from "@/lib/utils";
 import {
   ADMIN_ADD_NEW_BUTTON,
   ADMIN_NATIVE_SELECT,
+  ADMIN_PAGE_STACK,
+  ADMIN_SEARCH_ICON,
+  ADMIN_SEARCH_WRAP,
   adminDropdownItem,
   adminDropdownPanel,
   adminKebabButton,
   adminSearchFieldWithIcon,
   adminSurfaceCardBlur,
+  adminTable,
   adminTableDivide,
   adminTableHeadRow,
 } from "@/lib/admin-ui";
 import AdminPagination from "@/components/admin/AdminPagination";
+import {
+  AdminPageHeader,
+  AdminToolbar,
+  AdminToolbarRow,
+} from "@/components/admin/admin-page-header";
+import { AdminStatusChip } from "@/components/admin/admin-status-chip";
 import { getErrorToastMessage } from "@/lib/submit-error";
 import UserAvatar from "@/app/(main)/components/UserAvatar";
 
@@ -144,13 +154,25 @@ export default function UsersTable({ data }: { data: UsersResponse }) {
         onConfirm={runDelete}
       />
 
-      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <h1 className="text-xl font-semibold text-zinc-900 dark:text-white">
-          Danh sách người dùng
-        </h1>
+      <div className={ADMIN_PAGE_STACK}>
+      <AdminPageHeader
+        title="Người dùng"
+        description="Tìm kiếm, lọc vai trò và quản lý tài khoản hệ thống."
+        actions={
+          <button
+            type="button"
+            onClick={() => openModal("create-user", { roles })}
+            className={ADMIN_ADD_NEW_BUTTON}
+          >
+            <Plus size={14} />
+            Thêm mới
+          </button>
+        }
+      />
 
-        <div className="flex flex-wrap gap-3">
-          <div className="relative min-w-50 flex-1 lg:max-w-xs">
+      <AdminToolbar>
+        <AdminToolbarRow>
+          <div className={ADMIN_SEARCH_WRAP}>
             <input
               type="text"
               placeholder="Tên, Email, SĐT..."
@@ -158,10 +180,7 @@ export default function UsersTable({ data }: { data: UsersResponse }) {
               defaultValue={searchParams.get("search") || ""}
               className={adminSearchFieldWithIcon}
             />
-            <Search
-              className="pointer-events-none absolute left-3 top-2.5 text-zinc-400 dark:text-zinc-500"
-              size={18}
-            />
+            <Search className={ADMIN_SEARCH_ICON} />
           </div>
 
           <select
@@ -169,7 +188,7 @@ export default function UsersTable({ data }: { data: UsersResponse }) {
             defaultValue={searchParams.get("role") || ""}
             className={ADMIN_NATIVE_SELECT}
           >
-            <option value="">— Vai trò —</option>
+            <option value="">Vai trò</option>
             {roles.map((role) => (
               <option key={role.id} value={role.name}>
                 {roleMap[role.name] || role.name}
@@ -182,7 +201,7 @@ export default function UsersTable({ data }: { data: UsersResponse }) {
             defaultValue={searchParams.get("isVerified") || ""}
             className={ADMIN_NATIVE_SELECT}
           >
-            <option value="">— Email xác thực —</option>
+            <option value="">Email xác thực</option>
             <option value="true">Đã xác thực</option>
             <option value="false">Chưa xác thực</option>
           </select>
@@ -192,21 +211,12 @@ export default function UsersTable({ data }: { data: UsersResponse }) {
             defaultValue={searchParams.get("isBlocked") || ""}
             className={ADMIN_NATIVE_SELECT}
           >
-            <option value="">— Trạng thái khóa —</option>
+            <option value="">Trạng thái</option>
             <option value="false">Đang mở</option>
             <option value="true">Đang khóa</option>
           </select>
-
-          <button
-            type="button"
-            onClick={() => openModal("create-user", { roles })}
-            className={ADMIN_ADD_NEW_BUTTON}
-          >
-            <Plus size={18} />
-            Thêm mới
-          </button>
-        </div>
-      </div>
+        </AdminToolbarRow>
+      </AdminToolbar>
 
       <motion.div
         initial={{ opacity: 0, y: 16 }}
@@ -214,7 +224,7 @@ export default function UsersTable({ data }: { data: UsersResponse }) {
         className={cn(adminSurfaceCardBlur, "overflow-hidden p-0")}
       >
         <div className="overflow-x-auto">
-          <table className={cn("min-w-full text-sm", adminTableDivide)}>
+          <table className={cn(adminTable, adminTableDivide)}>
             <thead>
               <tr
                 className={cn(
@@ -251,11 +261,11 @@ export default function UsersTable({ data }: { data: UsersResponse }) {
                 >
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-zinc-200 bg-zinc-100 text-sm font-semibold text-zinc-600 dark:border-white/10 dark:bg-zinc-800 dark:text-zinc-300">
+                      <div className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full border border-zinc-200 bg-zinc-100 text-[10px] font-semibold text-zinc-600 dark:border-white/10 dark:bg-zinc-800 dark:text-zinc-300">
                         <UserAvatar
                           avatar={user?.avatar}
                           username={user?.username}
-                          size={48}
+                          size={28}
                         />
                       </div>
                       <span className="font-medium text-zinc-900 dark:text-white">
@@ -275,25 +285,17 @@ export default function UsersTable({ data }: { data: UsersResponse }) {
                       .join(", ")}
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex flex-wrap gap-1.5">
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                          user.isVerified
-                            ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300"
-                            : "bg-amber-100 text-amber-900 dark:bg-amber-500/15 dark:text-amber-200"
-                        }`}
+                    <div className="flex flex-wrap gap-1">
+                      <AdminStatusChip
+                        tone={user.isVerified ? "success" : "warning"}
                       >
-                        {user.isVerified ? "Email OK" : "Email chờ"}
-                      </span>
-                      {user.isBlocked ? (
-                        <span className="rounded-full bg-rose-100 px-2 py-0.5 text-xs font-medium text-rose-800 dark:bg-rose-500/15 dark:text-rose-300">
-                          Khóa
-                        </span>
-                      ) : (
-                        <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-700 dark:bg-zinc-500/15 dark:text-zinc-300">
-                          Mở
-                        </span>
-                      )}
+                        {user.isVerified ? "Email" : "Chờ mail"}
+                      </AdminStatusChip>
+                      <AdminStatusChip
+                        tone={user.isBlocked ? "danger" : "neutral"}
+                      >
+                        {user.isBlocked ? "Khóa" : "Mở"}
+                      </AdminStatusChip>
                     </div>
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -388,6 +390,7 @@ export default function UsersTable({ data }: { data: UsersResponse }) {
           onPageChange={handlePageChange}
         />
       </motion.div>
+      </div>
     </div>
   );
 }

@@ -27,23 +27,33 @@ import { jobService } from "@/services/job.service";
 import { AdminConfirmDialog } from "@/components/admin/admin-confirm-dialog";
 import AdminPagination from "@/components/admin/AdminPagination";
 import {
+  AdminPageHeader,
+  AdminToolbar,
+  AdminToolbarRow,
+} from "@/components/admin/admin-page-header";
+import {
   ADMIN_ADD_NEW_BUTTON,
   ADMIN_FILTER_FIELD,
   ADMIN_FILTER_GRID,
   ADMIN_FILTER_LABEL,
   ADMIN_FILTER_SELECT_WIDE,
   ADMIN_NATIVE_OPTION,
+  ADMIN_PAGE_STACK,
+  ADMIN_SEARCH_ICON,
+  ADMIN_SEARCH_WRAP,
   adminDropdownItem,
   adminDropdownPanel,
   adminKebabButton,
   adminSearchFieldWithIcon,
   adminSurfaceCardBlur,
+  adminTable,
   adminTableDivide,
   adminTableHeadRow,
 } from "@/lib/admin-ui";
 import { cn } from "@/lib/utils";
 import { getErrorToastMessage } from "@/lib/submit-error";
 import Image from "next/image";
+import { AdminStatusChip } from "@/components/admin/admin-status-chip";
 
 export default function JobsTable({ data }: { data: JobsResponse }) {
   const {
@@ -107,17 +117,22 @@ export default function JobsTable({ data }: { data: JobsResponse }) {
     }
   };
 
-  const badgeMod = (s: string | undefined) => {
+  const badgeModTone = (s: string | undefined) => {
     const v = s || "APPROVED";
-    if (v === "APPROVED")
-      return "bg-emerald-100 text-emerald-800 ring-emerald-200/80 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-500/20";
-    if (v === "PENDING")
-      return "bg-amber-100 text-amber-900 ring-amber-200 dark:bg-amber-500/15 dark:text-amber-200 dark:ring-amber-500/20";
-    return "bg-rose-100 text-rose-800 ring-rose-200 dark:bg-rose-500/15 dark:text-rose-200 dark:ring-rose-500/20";
+    if (v === "APPROVED") return "success" as const;
+    if (v === "PENDING") return "warning" as const;
+    return "danger" as const;
+  };
+
+  const badgeModLabel = (s: string | undefined) => {
+    const v = s || "APPROVED";
+    if (v === "APPROVED") return "Duyệt";
+    if (v === "PENDING") return "Chờ";
+    return "Từ chối";
   };
 
   return (
-    <div>
+    <div className={ADMIN_PAGE_STACK}>
       <AdminConfirmDialog
         open={confirmDeleteId != null}
         onOpenChange={(o) => !o && setConfirmDeleteId(null)}
@@ -129,27 +144,10 @@ export default function JobsTable({ data }: { data: JobsResponse }) {
         onConfirm={runDelete}
       />
 
-      <h1 className="text-xl font-semibold text-zinc-900 dark:text-white">
-        Danh sách việc làm
-      </h1>
-
-      <div className="mt-4 mb-6 flex flex-col gap-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div className="relative min-w-0 flex-1 sm:max-w-md">
-            <span className={ADMIN_FILTER_LABEL}>Tìm kiếm</span>
-            <div className="relative mt-1">
-              <input
-                placeholder="Tìm tiêu đề..."
-                onChange={handleSearch}
-                defaultValue={searchParams.get("search") || ""}
-                className={adminSearchFieldWithIcon}
-              />
-              <Search
-                className="pointer-events-none absolute left-3 top-2.5 text-zinc-400 dark:text-zinc-500"
-                size={18}
-              />
-            </div>
-          </div>
+      <AdminPageHeader
+        title="Việc làm"
+        description="Lọc tin theo trạng thái duyệt, hạn nộp và danh mục."
+        actions={
           <button
             type="button"
             onClick={() =>
@@ -160,14 +158,28 @@ export default function JobsTable({ data }: { data: JobsResponse }) {
                 experienceOptions: EXPERIENCE_OPTIONS,
               })
             }
-            className={`${ADMIN_ADD_NEW_BUTTON} shrink-0`}
+            className={ADMIN_ADD_NEW_BUTTON}
           >
-            <Plus size={18} />
+            <Plus size={14} />
             Thêm mới
           </button>
-        </div>
+        }
+      />
 
-        <div className={ADMIN_FILTER_GRID}>
+      <AdminToolbar>
+        <AdminToolbarRow>
+          <div className={cn(ADMIN_SEARCH_WRAP, "sm:max-w-md")}>
+            <input
+              placeholder="Tìm tiêu đề..."
+              onChange={handleSearch}
+              defaultValue={searchParams.get("search") || ""}
+              className={adminSearchFieldWithIcon}
+            />
+            <Search className={ADMIN_SEARCH_ICON} />
+          </div>
+        </AdminToolbarRow>
+
+        <div className={cn(ADMIN_FILTER_GRID, "pt-0.5")}>
           <div className={ADMIN_FILTER_FIELD}>
             <span className={ADMIN_FILTER_LABEL}>Duyệt tin</span>
             <select
@@ -295,7 +307,7 @@ export default function JobsTable({ data }: { data: JobsResponse }) {
             </select>
           </div>
         </div>
-      </div>
+      </AdminToolbar>
 
       <motion.div
         initial={{ opacity: 0, y: 16 }}
@@ -303,7 +315,7 @@ export default function JobsTable({ data }: { data: JobsResponse }) {
         className={cn(adminSurfaceCardBlur, "overflow-hidden p-0")}
       >
         <div className="overflow-x-auto">
-          <table className={cn("min-w-full text-sm", adminTableDivide)}>
+          <table className={cn(adminTable, adminTableDivide)}>
             <thead>
               <tr
                 className={cn(
@@ -341,7 +353,7 @@ export default function JobsTable({ data }: { data: JobsResponse }) {
                 >
                   <td className="px-4 py-3">
                     <div className="flex items-start gap-3">
-                      <div className="relative mt-0.5 h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-zinc-200 bg-white dark:border-white/10 dark:bg-zinc-800">
+                      <div className="relative mt-0.5 h-7 w-7 shrink-0 overflow-hidden rounded-md border border-zinc-200 bg-white dark:border-white/15">
                         <Image
                           src={job.company.logo || "/images/logo-default.png"}
                           alt={job.company.name}
@@ -356,9 +368,9 @@ export default function JobsTable({ data }: { data: JobsResponse }) {
                             {job.title}
                           </span>
                           {job.isFeatured && (
-                            <span className="inline-flex items-center gap-0.5 rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-semibold text-violet-800 ring-1 ring-violet-300 dark:bg-violet-500/20 dark:text-violet-200 dark:ring-violet-500/30">
-                              <Sparkles className="h-3 w-3" />
-                              Nổi bật
+                            <span className="inline-flex items-center gap-0.5 rounded-md bg-violet-50 px-1.5 py-px text-[10px] font-semibold text-violet-800 ring-1 ring-violet-200/80 dark:bg-violet-500/15 dark:text-violet-200 dark:ring-violet-500/30">
+                              <Sparkles className="h-2.5 w-2.5" />
+                              Hot
                             </span>
                           )}
                         </div>
@@ -386,14 +398,15 @@ export default function JobsTable({ data }: { data: JobsResponse }) {
                     {job.deadline ? formatDate(job.deadline) : "—"}
                   </td>
                   <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ${badgeMod(job.moderationStatus)}`}
+                    <AdminStatusChip
+                      tone={badgeModTone(job.moderationStatus)}
+                      title={
+                        modOptions.find((m) => m.value === job.moderationStatus)
+                          ?.label || job.moderationStatus
+                      }
                     >
-                      {modOptions.find((m) => m.value === job.moderationStatus)
-                        ?.label ||
-                        job.moderationStatus ||
-                        "—"}
-                    </span>
+                      {badgeModLabel(job.moderationStatus)}
+                    </AdminStatusChip>
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="relative inline-flex justify-end">

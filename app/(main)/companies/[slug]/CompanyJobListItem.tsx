@@ -11,6 +11,7 @@ import {
   formatSalaryShort,
 } from "@/utils/helper";
 import AppliedJobBadge from "@/app/(main)/components/badges/AppliedJobBadge";
+import { jobPublicPath } from "@/lib/job-path";
 
 function Tag({
   children,
@@ -41,7 +42,7 @@ export default function CompanyJobListItem({ job }: { job: Job }) {
   return (
     <li>
       <Link
-        href={`/jobs/${job.id}`}
+        href={jobPublicPath(job)}
         className="flex flex-col gap-3 rounded-xl border border-gray-100 bg-white p-4 transition hover:border-[#00b14f]/40 hover:shadow-md sm:flex-row sm:items-stretch sm:justify-between"
       >
         <div className="min-w-0 flex-1">

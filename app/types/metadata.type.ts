@@ -10,4 +10,8 @@ export type MetadataResponse = {
   JOB_TYPE_OPTIONS: SelectOption[];
   EXPERIENCE_OPTIONS: SelectOption[];
   SalaryRangeOptions: SelectOption[];
+  features?: {
+    ai: boolean;
+    opensearch: boolean;
+  };
 };

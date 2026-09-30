@@ -8,6 +8,7 @@ export type User = {
   avatar?: string;
   roles?: string[];
   permissions?: string[];
+  totpEnabled?: boolean;
   provinceId?: number | null;
   districtId?: number | null;
   provinceName?: string | null;

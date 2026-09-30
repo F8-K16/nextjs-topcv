@@ -1,6 +1,7 @@
 export type Company = {
   id: number;
   name: string;
+  slug?: string;
   description?: string;
   logo?: string;
   website?: string;

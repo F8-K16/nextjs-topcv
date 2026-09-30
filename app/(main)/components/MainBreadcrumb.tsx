@@ -71,6 +71,7 @@ function segmentLabel(segment: string, segments: string[], index: number) {
     return "CV chia sẻ";
   }
   if (SEGMENT_LABELS[segment]) return SEGMENT_LABELS[segment];
+  if (parent === "companies") return "Chi tiết công ty";
   if (/^\d+$/.test(segment)) {
     if (parent === "jobs") return "Chi tiết tin";
     if (parent === "companies") return "Chi tiết công ty";
@@ -107,7 +108,7 @@ export default function MainBreadcrumb() {
   });
 
   return (
-    <div className="hidden border-b border-zinc-200/70 bg-white/90 md:block">
+    <div className="hidden border-b border-zinc-200/70 bg-white/90 md:block dark:border-white/10 dark:bg-zinc-950/80">
       <div
         className={
           isEmployerArea
@@ -115,12 +116,12 @@ export default function MainBreadcrumb() {
             : "mx-auto max-w-6xl px-4 py-2.5 md:px-6"
         }
       >
-        <nav aria-label="Breadcrumb" className="text-xs text-zinc-500">
+        <nav aria-label="Breadcrumb" className="text-xs text-zinc-500 dark:text-zinc-400">
           <ol className="flex flex-wrap items-center gap-x-1.5 gap-y-1.5">
             <li className="flex min-w-0 items-center">
               <Link
                 href="/"
-                className="inline-flex items-center gap-1.5 leading-5 text-zinc-600 transition hover:text-primary"
+                className="inline-flex items-center gap-1.5 leading-5 text-zinc-600 transition hover:text-primary dark:text-zinc-300"
               >
                 <Home className="h-3.5 w-3.5 shrink-0" aria-hidden />
                 Trang chủ
@@ -135,12 +136,12 @@ export default function MainBreadcrumb() {
                   className="flex min-w-0 items-center gap-1.5"
                 >
                   <ChevronRight
-                    className="h-3.5 w-3.5 shrink-0 text-zinc-400"
+                    className="h-3.5 w-3.5 shrink-0 text-zinc-400 dark:text-zinc-500"
                     aria-hidden
                   />
                   {item.current ? (
                     <span
-                      className="min-w-0 break-words font-medium leading-5 text-zinc-800"
+                      className="min-w-0 break-words font-medium leading-5 text-zinc-800 dark:text-zinc-100"
                       title={text}
                     >
                       {text}
@@ -148,7 +149,7 @@ export default function MainBreadcrumb() {
                   ) : (
                     <Link
                       href={item.href}
-                      className="shrink-0 leading-5 text-zinc-600 transition hover:text-primary"
+                      className="shrink-0 leading-5 text-zinc-600 transition hover:text-primary dark:text-zinc-300"
                     >
                       {item.label}
                     </Link>

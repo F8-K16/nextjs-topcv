@@ -11,12 +11,15 @@ function parseIdList(value: string | null): number[] {
   return value
     .split(",")
     .map((x) => Number(x))
-    .filter((n) => Number.isFinite(n) && n > 0)
+    .filter((n) => Number.isFinite(n) && n !== 0)
     .map((n) => Math.trunc(n));
 }
 
 function collectLeafIds(node: CategoryTreeNode): number[] {
-  if (!node.children.length) return [node.id];
+  if (!node.children.length) {
+    // Danh mục cha (id âm) không gắn job — chỉ id con dương mới lọc được.
+    return node.id > 0 ? [node.id] : [];
+  }
   const out: number[] = [];
   for (const child of node.children) out.push(...collectLeafIds(child));
   return out;
@@ -37,10 +40,12 @@ function ParentCheckbox({
   checked,
   indeterminate,
   onChange,
+  label,
 }: {
   checked: boolean;
   indeterminate: boolean;
   onChange: (checked: boolean) => void;
+  label: string;
 }) {
   const ref = useRef<HTMLInputElement | null>(null);
   useEffect(() => {
@@ -52,8 +57,10 @@ function ParentCheckbox({
       ref={ref}
       type="checkbox"
       checked={checked}
+      aria-label={label}
+      onClick={(e) => e.stopPropagation()}
       onChange={(e) => onChange(e.target.checked)}
-      className="rounded border-zinc-300 text-primary focus:ring-primary"
+      className="h-4 w-4 shrink-0 cursor-pointer rounded border-zinc-300 text-primary focus:ring-primary"
     />
   );
 }
@@ -69,17 +76,33 @@ export default function CategoryFilterAccordion({
   const roots = useMemo(() => tree.filter((x) => x.parentId == null), [tree]);
   const nodeById = useMemo(() => buildNodeIndex(roots), [roots]);
 
-  const selectedIds = useMemo(() => {
+  const urlSelectedIds = useMemo(() => {
     const explicit = parseIdList(searchParams.get("categoryIds"));
-    if (explicit.length) return [...new Set(explicit)].sort((a, b) => a - b);
-    const legacyId = Number(searchParams.get("categoryId"));
-    if (!Number.isFinite(legacyId) || legacyId <= 0) return [];
-    const legacyKey = Math.trunc(legacyId);
-    const node = nodeById.get(legacyKey) ?? nodeById.get(-legacyKey);
-    if (!node) return [Math.trunc(legacyId)];
-    return [...new Set(collectLeafIds(node))].sort((a, b) => a - b);
+    const raw = explicit.length
+      ? explicit
+      : (() => {
+          const legacyId = Number(searchParams.get("categoryId"));
+          if (!Number.isFinite(legacyId) || legacyId === 0) return [];
+          return [Math.trunc(legacyId)];
+        })();
+
+    const out: number[] = [];
+    for (const id of raw) {
+      const node =
+        nodeById.get(id) ?? (id > 0 ? nodeById.get(-id) : undefined);
+      if (node) out.push(...collectLeafIds(node));
+      else if (id > 0) out.push(id);
+    }
+    return [...new Set(out)].sort((a, b) => a - b);
   }, [nodeById, searchParams]);
 
+  const urlKey = urlSelectedIds.join(",");
+  const [overrideIds, setOverrideIds] = useState<number[] | null>(null);
+  useEffect(() => {
+    setOverrideIds(null);
+  }, [urlKey]);
+
+  const selectedIds = overrideIds ?? urlSelectedIds;
   const selectedSet = useMemo(() => new Set<number>(selectedIds), [selectedIds]);
 
   const autoOpenSet = useMemo(() => {
@@ -98,11 +121,12 @@ export default function CategoryFilterAccordion({
     const params = new URLSearchParams(searchParams.toString());
     params.delete("categoryId");
     const sorted = [...nextSelected].sort((a, b) => a - b);
+    setOverrideIds(sorted);
     if (!sorted.length) params.delete("categoryIds");
     else params.set("categoryIds", sorted.join(","));
     params.delete("page");
     const qs = params.toString();
-    router.push(qs ? `/jobs?${qs}` : "/jobs");
+    router.push(qs ? `/jobs?${qs}` : "/jobs", { scroll: false });
   };
 
   const setNodeChecked = (node: CategoryTreeNode, checked: boolean) => {
@@ -113,19 +137,6 @@ export default function CategoryFilterAccordion({
       for (const id of leafIds) next.add(id);
     } else {
       for (const id of leafIds) next.delete(id);
-    }
-    updateUrl(next);
-  };
-
-  const toggleParent = (parent: CategoryTreeNode) => {
-    const leafIds = collectLeafIds(parent);
-    if (!leafIds.length) return;
-    const allChecked = leafIds.every((id) => selectedSet.has(id));
-    const next = new Set<number>(selectedSet);
-    if (allChecked) {
-      for (const id of leafIds) next.delete(id);
-    } else {
-      for (const id of leafIds) next.add(id);
     }
     updateUrl(next);
   };
@@ -142,37 +153,39 @@ export default function CategoryFilterAccordion({
         const isOpen = openOverride[parent.id] ?? autoOpenSet.has(parent.id);
         return (
           <div key={parent.id} className="rounded-xl border border-zinc-200/80">
-            <button
-              type="button"
-              onClick={() =>
-                setOpenOverride((prev) => {
-                  const current = prev[parent.id] ?? autoOpenSet.has(parent.id);
-                  return { ...prev, [parent.id]: !current };
-                })
-              }
-              className="flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left"
-            >
-              <div className="flex min-w-0 items-center gap-2.5">
-                <span
-                  onClick={(e) => e.stopPropagation()}
-                  className="flex items-center"
-                >
-                  <ParentCheckbox
-                    checked={allChecked}
-                    indeterminate={indeterminate}
-                    onChange={() => toggleParent(parent)}
-                  />
-                </span>
+            <div className="flex items-center gap-1 pr-1">
+              <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 px-3 py-2.5">
+                <ParentCheckbox
+                  checked={allChecked}
+                  indeterminate={indeterminate}
+                  label={`Lọc ngành ${parent.name}`}
+                  onChange={(checked) => setNodeChecked(parent, checked)}
+                />
                 <span className="truncate text-sm font-semibold text-zinc-900">
                   {parent.name}
                 </span>
-              </div>
-              <ChevronDown
-                className={`h-4 w-4 shrink-0 text-zinc-400 transition ${
-                  isOpen ? "rotate-180" : ""
-                }`}
-              />
-            </button>
+              </label>
+              <button
+                type="button"
+                aria-expanded={isOpen}
+                aria-label={
+                  isOpen
+                    ? `Thu gọn ${parent.name}`
+                    : `Mở danh mục con ${parent.name}`
+                }
+                onClick={() =>
+                  setOpenOverride((prev) => {
+                    const current = prev[parent.id] ?? autoOpenSet.has(parent.id);
+                    return { ...prev, [parent.id]: !current };
+                  })
+                }
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700"
+              >
+                <ChevronDown
+                  className={`h-4 w-4 transition ${isOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+            </div>
 
             {isOpen ? (
               <div className="border-t border-zinc-100 px-3 py-2.5">
@@ -193,6 +206,7 @@ export default function CategoryFilterAccordion({
                             <ParentCheckbox
                               checked={childAllChecked}
                               indeterminate={childIndeterminate}
+                              label={`Lọc ${child.name}`}
                               onChange={(checked) => setNodeChecked(child, checked)}
                             />
                             <span className="min-w-0 truncate">

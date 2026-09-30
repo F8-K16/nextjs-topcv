@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Heart, Loader2 } from "lucide-react";
 
 import { useAuthStore } from "@/app/stores/auth.store";
-import { useModalStore } from "@/app/stores/modal.store";
+import { useRBAC } from "@/hooks/useRBAC";
 
 import { STALE_SAVED_JOBS_MS } from "@/lib/query-stale-time";
 import { savedJobService } from "@/services/saved-job.service";
@@ -18,12 +19,13 @@ type Props = {
 
 export default function SaveJobButton({ jobId, size = 16 }: Props) {
   const { user, isAuthenticated } = useAuthStore();
-  const { openModal } = useModalStore();
+  const { can } = useRBAC();
+  const router = useRouter();
   const queryClient = useQueryClient();
 
   const [loading, setLoading] = useState(false);
 
-  const isCandidate = Boolean(user?.roles?.includes("CANDIDATE"));
+  const isCandidate = can("jobs:save");
   const queryKey = ["saved-jobs", user?.id];
 
   const { data: savedJobs = [] } = useQuery<SavedJob[]>({
@@ -48,7 +50,6 @@ export default function SaveJobButton({ jobId, size = 16 }: Props) {
       queryClient.setQueryData<SavedJob[]>(queryKey, [
         ...previous,
         {
-          id: 0,
           candidateId: 0,
           jobId,
           createdAt: new Date().toISOString(),
@@ -98,7 +99,8 @@ export default function SaveJobButton({ jobId, size = 16 }: Props) {
 
   const handleClick = () => {
     if (!isAuthenticated) {
-      openModal("login");
+      const next = `${window.location.pathname}${window.location.search}`;
+      router.push(`/auth/login?redirect=${encodeURIComponent(next)}`);
       return;
     }
 

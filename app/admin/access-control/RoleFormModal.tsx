@@ -18,9 +18,11 @@ import type {
 } from "@/app/types/access-control.type";
 import { cn } from "@/lib/utils";
 import {
+  ADMIN_SEARCH_ICON,
   adminDialogSurface,
   adminInput,
   adminLabel,
+  adminSearchFieldWithIcon,
 } from "@/lib/admin-ui";
 import { getErrorToastMessage, resolveSubmitError } from "@/lib/submit-error";
 
@@ -219,12 +221,12 @@ export default function RoleFormModal({
                 </span>
               </label>
               <div className="relative w-full sm:w-56">
-                <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-zinc-400 dark:text-zinc-500" />
+                <Search className={ADMIN_SEARCH_ICON} />
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Tìm quyền hoặc module..."
-                  className={cn(adminInput, "py-2 pl-9 pr-3 text-xs")}
+                  className={adminSearchFieldWithIcon}
                 />
               </div>
             </div>

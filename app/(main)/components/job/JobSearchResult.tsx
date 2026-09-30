@@ -32,7 +32,7 @@ function buildJobsQueryString(props: Props, page: number): string {
   if (props.districtId) params.set("districtId", String(props.districtId));
   if (props.categoryIds?.length) {
     const uniq = [...new Set(props.categoryIds)]
-      .filter((n) => Number.isFinite(n) && n > 0)
+      .filter((n) => Number.isFinite(n) && n !== 0)
       .map((n) => Math.trunc(n))
       .sort((a, b) => a - b);
     if (uniq.length) params.set("categoryIds", uniq.join(","));

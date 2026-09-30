@@ -35,7 +35,7 @@ export default async function JobPage({ searchParams }: Props) {
     ? sp.categoryIds
         .split(",")
         .map((x) => Number(x))
-        .filter((n) => Number.isFinite(n) && n > 0)
+        .filter((n) => Number.isFinite(n) && n !== 0)
         .map((n) => Math.trunc(n))
     : [];
 

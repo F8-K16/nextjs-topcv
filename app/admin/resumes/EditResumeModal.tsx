@@ -20,6 +20,8 @@ import {
   applyFieldErrorsToForm,
   resolveSubmitError,
 } from "@/lib/submit-error";
+import { adminDialogSurface, adminInput, adminLabel } from "@/lib/admin-ui";
+import { cn } from "@/lib/utils";
 
 type FormData = z.input<typeof updateResumeSchema>;
 
@@ -79,18 +81,18 @@ export default function EditResumeModal({
     }
   };
 
-  const inputClass = "w-full p-2 bg-[#2f2f2f] rounded border border-gray-700";
+  const inputClass = adminInput;
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="bg-[#1e1e1e] text-white border border-gray-700 min-w-xl">
+      <DialogContent className={cn("min-w-xl border", adminDialogSurface)}>
         <DialogHeader>
           <DialogTitle>Chỉnh sửa CV</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
           <div>
-            <label className="text-sm text-gray-400">Tiêu đề</label>
+            <label className={adminLabel}>Tiêu đề</label>
             <input
               {...register("title")}
               className={inputClass}
@@ -104,7 +106,7 @@ export default function EditResumeModal({
           </div>
 
           <div>
-            <label className="text-sm text-gray-400">File CV (URL)</label>
+            <label className={adminLabel}>File CV (URL)</label>
             <input
               {...register("fileUrl")}
               className={inputClass}
@@ -118,7 +120,7 @@ export default function EditResumeModal({
           </div>
 
           <div>
-            <label className="text-sm text-gray-400">Ứng viên</label>
+            <label className={adminLabel}>Ứng viên</label>
             <select
               {...register("candidateId", {
                 setValueAs: (v) => Number(v),

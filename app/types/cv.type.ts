@@ -13,6 +13,7 @@ export type CvTemplateSection = {
   bindingPath: string;
   itemBlocks?: CvTemplateBlock[];
   defaultItem?: Record<string, string>;
+  sampleItems?: Record<string, string>[];
 };
 
 export type CvTemplateData = {
@@ -27,7 +28,7 @@ export type CvTemplateSummary = {
   name: string;
   description?: string | null;
   thumbnailUrl?: string | null;
-  isActive?: boolean;
+  status?: boolean;
   createdAt?: string;
   updatedAt?: string;
 };
