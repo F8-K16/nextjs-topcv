@@ -21,4 +21,4 @@ jobs:
       - name: Test
         run: pnpm test
       - name: Typecheck
-        run: pnpm exec tsc --noEmit --pretty false
+        run: pnpm typecheck
