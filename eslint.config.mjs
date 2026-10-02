@@ -6,6 +6,8 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   {
+    // Cùng glob với eslint-config-next. File .cjs (pm2) không có plugin react-hooks.
+    files: ["**/*.{js,jsx,mjs,ts,tsx,mts,cts}"],
     rules: {
       "@typescript-eslint/no-unused-vars": "error",
       // Gợi ý React Compiler trên effect có sẵn. Giữ warn để CI vẫn thấy,
