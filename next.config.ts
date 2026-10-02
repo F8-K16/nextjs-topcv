@@ -42,7 +42,7 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     serverActions: {
-      allowedOrigins: ["localhost:3000", "13.211.65.207:3001"],
+      allowedOrigins: ["localhost:3001", "nextcv.io.vn", "www.nextcv.io.vn"],
     },
   },
 };

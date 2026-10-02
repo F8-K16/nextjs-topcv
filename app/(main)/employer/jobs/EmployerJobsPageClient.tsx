@@ -42,13 +42,13 @@ function modLabel(v: string | undefined) {
 function modBadgeClass(v: string | undefined) {
   switch (v) {
     case "PENDING":
-      return "bg-amber-100 text-amber-900";
+      return "bg-amber-100 text-amber-900 dark:bg-amber-500/20 dark:text-amber-200";
     case "APPROVED":
-      return "bg-emerald-100 text-emerald-900";
+      return "bg-emerald-100 text-emerald-900 dark:bg-emerald-500/20 dark:text-emerald-200";
     case "REJECTED":
-      return "bg-red-100 text-red-900";
+      return "bg-red-100 text-red-900 dark:bg-red-500/20 dark:text-red-200";
     default:
-      return "bg-zinc-100 text-zinc-700";
+      return "bg-zinc-100 text-zinc-700 dark:bg-white/10 dark:text-zinc-200";
   }
 }
 
@@ -224,7 +224,7 @@ export default function EmployerJobsPageClient() {
           <div className="flex flex-wrap items-end gap-2">
             <button
               type="submit"
-              className="rounded-xl bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800"
+              className="rounded-xl bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
             >
               {"Tìm"}
             </button>
@@ -265,7 +265,7 @@ export default function EmployerJobsPageClient() {
               return (
                 <li
                   key={job.id}
-                  className="flex items-center gap-3 px-4 py-3.5 hover:bg-zinc-50/80"
+                  className="flex items-center gap-3 px-4 py-3.5 hover:bg-zinc-50/80 dark:hover:bg-white/[0.06]"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
@@ -284,7 +284,7 @@ export default function EmployerJobsPageClient() {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger
-                      className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-zinc-500 hover:bg-zinc-100"
+                      className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/10"
                       aria-label={`Thao tác tin ${job.title}`}
                     >
                       <MoreHorizontal className="h-4 w-4" />
@@ -334,7 +334,7 @@ export default function EmployerJobsPageClient() {
               onClick={() =>
                 setParams({ page: cur <= 2 ? null : String(cur - 1) })
               }
-              className="rounded-xl border border-zinc-200 bg-white px-3 py-1.5 font-medium hover:bg-zinc-50 disabled:opacity-40"
+              className="rounded-xl border border-zinc-200 bg-white px-3 py-1.5 font-medium hover:bg-zinc-50 disabled:opacity-40 dark:hover:bg-white/10"
             >
               {"Trước"}
             </button>
@@ -342,7 +342,7 @@ export default function EmployerJobsPageClient() {
               type="button"
               disabled={cur >= totalPages}
               onClick={() => setParams({ page: String(cur + 1) })}
-              className="rounded-xl border border-zinc-200 bg-white px-3 py-1.5 font-medium hover:bg-zinc-50 disabled:opacity-40"
+              className="rounded-xl border border-zinc-200 bg-white px-3 py-1.5 font-medium hover:bg-zinc-50 disabled:opacity-40 dark:hover:bg-white/10"
             >
               {"Sau"}
             </button>

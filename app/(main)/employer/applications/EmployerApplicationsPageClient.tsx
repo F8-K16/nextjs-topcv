@@ -63,15 +63,15 @@ function appStatusLabel(status: string) {
 function appBadgeClass(status: string) {
   switch (status) {
     case "PENDING":
-      return "bg-amber-100 text-amber-900";
+      return "bg-amber-100 text-amber-900 dark:bg-amber-500/20 dark:text-amber-200";
     case "REVIEWED":
-      return "bg-sky-100 text-sky-900";
+      return "bg-sky-100 text-sky-900 dark:bg-sky-500/20 dark:text-sky-200";
     case "ACCEPTED":
-      return "bg-emerald-100 text-emerald-900";
+      return "bg-emerald-100 text-emerald-900 dark:bg-emerald-500/20 dark:text-emerald-200";
     case "REJECTED":
-      return "bg-red-100 text-red-900";
+      return "bg-red-100 text-red-900 dark:bg-red-500/20 dark:text-red-200";
     default:
-      return "bg-zinc-100 text-zinc-700";
+      return "bg-zinc-100 text-zinc-700 dark:bg-white/10 dark:text-zinc-200";
   }
 }
 
@@ -233,10 +233,10 @@ export default function EmployerApplicationsPageClient() {
                   <li
                     key={row.id}
                     className={cn(
-                      "overflow-hidden rounded-xl border border-[#00b14f]/20 bg-linear-to-br from-[#00b14f]/14 via-white to-[#087a38]/10 shadow-xs transition",
+                      "overflow-hidden rounded-xl border border-[#00b14f]/20 bg-linear-to-br from-[#00b14f]/14 via-white to-[#087a38]/10 shadow-xs transition dark:from-[#00b14f]/20 dark:via-zinc-900 dark:to-[#087a38]/15",
                       active
-                        ? "ring-2 ring-[#00b14f]/60 ring-offset-1"
-                        : "hover:shadow-sm",
+                        ? "ring-2 ring-[#00b14f]/60 ring-offset-1 dark:ring-offset-zinc-900"
+                        : "hover:bg-white/0 hover:shadow-sm dark:hover:bg-white/[0.04]",
                     )}
                   >
                     <button
@@ -342,7 +342,7 @@ export default function EmployerApplicationsPageClient() {
               onClick={() =>
                 setParams({ page: cur <= 2 ? null : String(cur - 1) })
               }
-              className="rounded-xl border border-zinc-200 bg-white px-3 py-1.5 font-medium hover:bg-zinc-50 disabled:opacity-40"
+              className="rounded-xl border border-zinc-200 bg-white px-3 py-1.5 font-medium hover:bg-zinc-50 disabled:opacity-40 dark:hover:bg-white/10"
             >
               Trước
             </button>
@@ -350,7 +350,7 @@ export default function EmployerApplicationsPageClient() {
               type="button"
               disabled={cur >= totalPages}
               onClick={() => setParams({ page: String(cur + 1) })}
-              className="rounded-xl border border-zinc-200 bg-white px-3 py-1.5 font-medium hover:bg-zinc-50 disabled:opacity-40"
+              className="rounded-xl border border-zinc-200 bg-white px-3 py-1.5 font-medium hover:bg-zinc-50 disabled:opacity-40 dark:hover:bg-white/10"
             >
               {"Sau"}
             </button>

@@ -71,7 +71,6 @@ export default function RecommendedJobsClient() {
   }
 
   const data = q.data;
-  console.log(data?.jobs);
   if (!data?.jobs.length) {
     return (
       <div className="space-y-4 rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center">

@@ -54,13 +54,13 @@ function modLabel(v: string | undefined) {
 function modBadgeClass(v: string | undefined) {
   switch (v) {
     case "PENDING":
-      return "bg-amber-100 text-amber-900";
+      return "bg-amber-100 text-amber-900 dark:bg-amber-500/20 dark:text-amber-200";
     case "APPROVED":
-      return "bg-emerald-100 text-emerald-900";
+      return "bg-emerald-100 text-emerald-900 dark:bg-emerald-500/20 dark:text-emerald-200";
     case "REJECTED":
-      return "bg-red-100 text-red-900";
+      return "bg-red-100 text-red-900 dark:bg-red-500/20 dark:text-red-200";
     default:
-      return "bg-zinc-100 text-zinc-700";
+      return "bg-zinc-100 text-zinc-700 dark:bg-white/10 dark:text-zinc-200";
   }
 }
 
@@ -77,15 +77,15 @@ function appStatusLabel(s: string) {
 function appBadgeClass(s: string) {
   switch (s) {
     case "PENDING":
-      return "bg-amber-100 text-amber-900";
+      return "bg-amber-100 text-amber-900 dark:bg-amber-500/20 dark:text-amber-200";
     case "REVIEWED":
-      return "bg-sky-100 text-sky-900";
+      return "bg-sky-100 text-sky-900 dark:bg-sky-500/20 dark:text-sky-200";
     case "ACCEPTED":
-      return "bg-emerald-100 text-emerald-900";
+      return "bg-emerald-100 text-emerald-900 dark:bg-emerald-500/20 dark:text-emerald-200";
     case "REJECTED":
-      return "bg-red-100 text-red-900";
+      return "bg-red-100 text-red-900 dark:bg-red-500/20 dark:text-red-200";
     default:
-      return "bg-zinc-100 text-zinc-700";
+      return "bg-zinc-100 text-zinc-700 dark:bg-white/10 dark:text-zinc-200";
   }
 }
 

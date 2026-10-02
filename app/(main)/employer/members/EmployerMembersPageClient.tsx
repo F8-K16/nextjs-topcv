@@ -122,7 +122,7 @@ export default function EmployerMembersPageClient() {
                 </tr>
               ) : (
                 members.map((row) => (
-                  <tr key={row.employerId} className="hover:bg-zinc-50/80">
+                  <tr key={row.employerId} className="hover:bg-zinc-50/80 dark:hover:bg-white/[0.06]">
                     <td className="px-4 py-3 font-medium text-zinc-900">
                       {row.username}
                     </td>

@@ -472,7 +472,7 @@ export default function EmployerJobForm({
                         "flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition",
                         active
                           ? "bg-[#00b14f]/10 text-[#087a38]"
-                          : "text-zinc-800 hover:bg-white",
+                          : "text-zinc-800 hover:bg-white dark:hover:bg-white/10",
                       )}
                     >
                       <input

@@ -38,22 +38,26 @@ const REASON_META: Record<
 > = {
   applied: {
     label: "Đã ứng tuyển",
-    colorClass: "bg-emerald-50 text-emerald-800 border-emerald-200",
+    colorClass:
+      "bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-200 dark:border-emerald-500/30",
     icon: <FileText className="h-3 w-3" />,
   },
   skill_match: {
     label: "Khớp kỹ năng",
-    colorClass: "bg-violet-50 text-violet-800 border-violet-200",
+    colorClass:
+      "bg-violet-50 text-violet-800 border-violet-200 dark:bg-violet-500/15 dark:text-violet-200 dark:border-violet-500/30",
     icon: <Zap className="h-3 w-3" />,
   },
   multi_match: {
     label: "Nhiều tiêu chí phù hợp",
-    colorClass: "bg-amber-50 text-amber-800 border-amber-200",
+    colorClass:
+      "bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-500/15 dark:text-amber-200 dark:border-amber-500/30",
     icon: <Star className="h-3 w-3" />,
   },
   category_match: {
     label: "Ngành phù hợp",
-    colorClass: "bg-sky-50 text-sky-800 border-sky-200",
+    colorClass:
+      "bg-sky-50 text-sky-800 border-sky-200 dark:bg-sky-500/15 dark:text-sky-200 dark:border-sky-500/30",
     icon: <Briefcase className="h-3 w-3" />,
   },
 };
@@ -107,8 +111,8 @@ export default function EmployerSuggestionsPageClient() {
       <div>
         <h1 className="text-xl font-bold text-zinc-900">Gợi ý ứng viên</h1>
         <p className="mt-1 text-sm text-zinc-500">
-          Xếp hạng theo mức độ phù hợp: kỹ năng, ngành nghề, kinh nghiệm, địa
-          điểm và lịch sử ứng tuyển.
+          Mỗi người được chấm theo từng tin. Danh sách hiện người chưa nộp tin
+          đó, xếp theo kỹ năng, ngành, kinh nghiệm và khu vực.
         </p>
       </div>
 
@@ -169,7 +173,7 @@ export default function EmployerSuggestionsPageClient() {
       {/* List */}
       {items.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-zinc-200 bg-white p-10 text-center text-zinc-500">
-          Chưa có gợi ý. Hãy đăng tin hoặc chờ ứng viên ứng tuyển.
+          Chưa có ứng viên khớp tin đang tuyển. Người đã nộp tin đó nằm ở mục hồ sơ ứng tuyển.
         </div>
       ) : (
         <>
@@ -204,6 +208,12 @@ export default function EmployerSuggestionsPageClient() {
                     </div>
 
                     {/* Location */}
+                    {row.matchedJob ? (
+                      <p className="text-xs font-medium text-zinc-700">
+                        Phù hợp tin: {row.matchedJob.title}
+                      </p>
+                    ) : null}
+
                     {(row.district?.name || row.province?.name) && (
                       <p className="flex items-center gap-1 text-xs text-zinc-500">
                         <MapPin className="h-3.5 w-3.5 shrink-0 text-primary" />
@@ -216,12 +226,12 @@ export default function EmployerSuggestionsPageClient() {
                     {/* Match details */}
                     <div className="flex flex-wrap gap-1.5">
                       {row.matchedSkillCount > 0 && (
-                        <span className="rounded-full bg-violet-50 px-2 py-0.5 text-[11px] text-violet-700">
+                        <span className="rounded-full bg-violet-50 px-2 py-0.5 text-[11px] text-violet-700 dark:bg-violet-500/15 dark:text-violet-200">
                           {row.matchedSkillCount} kỹ năng khớp
                         </span>
                       )}
                       {row.matchedCategoryCount > 0 && (
-                        <span className="rounded-full bg-sky-50 px-2 py-0.5 text-[11px] text-sky-700">
+                        <span className="rounded-full bg-sky-50 px-2 py-0.5 text-[11px] text-sky-700 dark:bg-sky-500/15 dark:text-sky-200">
                           {row.matchedCategoryCount} ngành khớp
                         </span>
                       )}

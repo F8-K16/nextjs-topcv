@@ -340,6 +340,7 @@ export const employerPortalService = {
           reason: "applied" | "category_match" | "skill_match" | "multi_match";
           matchedSkillCount: number;
           matchedCategoryCount: number;
+          matchedJob?: { id: number; title: string };
           hint: string;
         }>;
         pagination: { total: number; page: number; limit: number; totalPages: number };

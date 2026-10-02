@@ -252,7 +252,7 @@ export default function EmployerSubnav({
               <Link
                 href="/"
                 onClick={closeDrawer}
-                className="mt-auto inline-flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50"
+                className="mt-auto inline-flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-white/5"
               >
                 <Home className="h-4 w-4" />
                 {L_HOME}

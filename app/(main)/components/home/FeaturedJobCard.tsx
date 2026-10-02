@@ -38,6 +38,11 @@ export default function FeaturedJobCard({ job }: { job: Job }) {
           <span className="rounded-lg bg-zinc-100 px-2.5 py-1 text-[11px] font-medium text-zinc-700">
             {formatSalaryShort(job.minSalary, job.maxSalary)}
           </span>
+          {job.matchReasons?.[0] ? (
+            <span className="max-w-[min(100%,12rem)] truncate rounded-lg bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary sm:max-w-[14rem]">
+              {job.matchReasons[0]}
+            </span>
+          ) : null}
           {job.workLocation ? (
             <span className="max-w-[min(100%,12rem)] truncate rounded-lg bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-800 sm:max-w-[14rem]">
               {job.workLocation}

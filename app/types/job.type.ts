@@ -100,6 +100,7 @@ export type Job = {
   };
 
   jobSkills?: { skill: { id: number; name: string } }[];
+  matchReasons?: string[];
 
   _count?: {
     applications: number;

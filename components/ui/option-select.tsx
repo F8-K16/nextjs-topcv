@@ -111,7 +111,7 @@ export default function OptionSelect({
           width: menuPos.width,
           maxHeight: menuPos.maxHeight,
         }}
-        className="fixed z-[80] overflow-y-auto rounded-xl border border-zinc-200/90 bg-white p-1.5 shadow-xl shadow-zinc-900/10 ring-1 ring-black/5"
+        className="employer-app fixed z-[80] overflow-y-auto rounded-xl border border-zinc-200/90 bg-white p-1.5 shadow-xl shadow-zinc-900/10 ring-1 ring-black/5 dark:border-white/10 dark:bg-zinc-900 dark:shadow-black/40 dark:ring-white/10"
       >
         {allowClear ? (
           <OptionRow
@@ -152,7 +152,7 @@ export default function OptionSelect({
           size === "sm" ? "h-8 px-2 text-xs" : "h-10 px-3 text-sm",
           open
             ? "border-primary ring-2 ring-primary/20"
-            : "border-zinc-200 hover:border-zinc-300",
+            : "border-zinc-200 hover:border-zinc-300 dark:hover:border-white/25",
           disabled &&
             "cursor-not-allowed bg-zinc-50 text-zinc-400 hover:border-zinc-200",
           triggerClassName,
@@ -201,8 +201,8 @@ function OptionRow({
       className={cn(
         "group flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-sm transition",
         active
-          ? "bg-[#00b14f]/10 font-semibold text-[#087a38]"
-          : "text-[#212f3f] hover:bg-green-50 hover:text-[#00b14f]",
+          ? "bg-[#00b14f]/10 font-semibold text-[#087a38] dark:text-emerald-300"
+          : "text-[#212f3f] hover:bg-green-50 hover:text-[#00b14f] dark:text-zinc-200 dark:hover:bg-white/10 dark:hover:text-emerald-300",
       )}
     >
       <span className="min-w-0 flex-1 truncate">{label}</span>
@@ -211,7 +211,7 @@ function OptionRow({
           "flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition",
           active
             ? "border-[#00b14f] bg-[#00b14f] text-white"
-            : "border-zinc-300 bg-white text-transparent group-hover:border-[#00b14f]",
+            : "border-zinc-300 bg-white text-transparent group-hover:border-[#00b14f] dark:border-white/20 dark:bg-zinc-800",
         )}
       >
         <Check

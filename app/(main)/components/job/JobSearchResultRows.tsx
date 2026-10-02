@@ -59,6 +59,9 @@ export default function JobSearchResultRows({ jobs }: { jobs: Job[] }) {
                   <Tag>{formatExperience(job.experienceLevel)}</Tag>
                 )}
                 {job.category?.name && <Tag>{job.category.name}</Tag>}
+                {job.matchReasons?.map((reason) => (
+                  <Tag key={reason}>{reason}</Tag>
+                ))}
                 <AppliedJobBadge jobId={job.id} />
               </div>
             </div>
