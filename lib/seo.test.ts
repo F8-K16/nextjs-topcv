@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { cvEditorPath } from "./cv-editor-path";
 import { cvTemplatePublicPath } from "./cv-template-path";
 import { readPublicFeatures } from "./public-features";
 import { buildJobPostingJsonLd } from "./job-posting";
@@ -55,5 +56,16 @@ describe("cvTemplatePublicPath", () => {
       "/cv/templates/toi-gian",
     );
     expect(cvTemplatePublicPath({ id: 3, slug: null })).toBe("/cv/templates/3");
+  });
+});
+
+describe("cvEditorPath", () => {
+  it("uses template slug and cv id", () => {
+    expect(cvEditorPath({ id: 12, template: { slug: "toi-gian" } })).toBe(
+      "/cv/editor/toi-gian?cv=12",
+    );
+    expect(cvEditorPath({ id: 12, template: { slug: null } })).toBe(
+      "/cv/editor/12",
+    );
   });
 });

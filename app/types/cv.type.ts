@@ -70,6 +70,7 @@ export type CvListItem = {
   template: {
     id: number;
     name: string;
+    slug?: string | null;
     thumbnailUrl?: string | null;
   };
 };

@@ -13,15 +13,21 @@ export default function CvDraftModal() {
   const { isOpen, type, data, closeModal } = useModalStore();
 
   const cvId = Number(data?.cvId);
+  const cvHref =
+    typeof data?.cvHref === "string" && data.cvHref.startsWith("/cv/editor/")
+      ? data.cvHref
+      : Number.isFinite(cvId) && cvId > 0
+        ? `/cv/editor/${cvId}`
+        : "";
   const title = String(data?.cvTitle ?? "").trim();
   const thumbnailUrl = (data?.cvThumbnailUrl as string | null | undefined) ?? null;
   const lastEditedAt = (data?.cvLastEditedAt as string | undefined) ?? undefined;
 
   const canRender = useMemo(() => {
     if (!isOpen || type !== "cv-draft") return false;
-    if (!Number.isFinite(cvId) || cvId <= 0) return false;
+    if (!cvHref) return false;
     return true;
-  }, [isOpen, type, cvId]);
+  }, [isOpen, type, cvHref]);
 
   if (!canRender) return null;
 
@@ -91,7 +97,7 @@ export default function CvDraftModal() {
               type="button"
               onClick={() => {
                 closeModal();
-                router.push(`/cv/editor/${cvId}`);
+                router.push(cvHref);
               }}
               className="rounded-full bg-[#00b14f] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#009944]"
             >

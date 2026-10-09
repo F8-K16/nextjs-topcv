@@ -8,6 +8,7 @@ import { ArrowLeft, Loader2, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { cvService } from "@/services/cv.service";
+import { cvEditorPath } from "@/lib/cv-editor-path";
 import { cvTemplatePublicPath } from "@/lib/cv-template-path";
 import {
   GC_DEFAULT_MS,
@@ -68,7 +69,7 @@ export default function CvTemplatePreviewClient({ templateKey }: Props) {
     mutationFn: (templateId: number) => cvService.createCv({ templateId }),
     onSuccess: (cv) => {
       toast.success("Đã tạo CV nháp");
-      router.push(`/cv/editor/${cv.id}`);
+      router.push(cvEditorPath(cv));
     },
     onError: () => {
       toast.error("Không tạo được CV. Vui lòng thử lại.");

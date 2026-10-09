@@ -17,8 +17,10 @@ import {
   GC_DEFAULT_MS,
   STALE_CV_DETAIL_MS,
 } from "@/lib/query-stale-time";
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/app/stores/auth.store";
 import { cvService } from "@/services/cv.service";
+import { cvEditorPath } from "@/lib/cv-editor-path";
 import type { Cv, CvContent } from "@/app/types/cv.type";
 import { buildEmptyContent, getByPath, setByPath } from "@/lib/cv-content";
 import { requestAppConfirm } from "@/app/stores/confirm-dialog.store";
@@ -30,7 +32,7 @@ import { usePublicFeatures } from "@/hooks/usePublicFeatures";
 import { API_BASE_URL } from "@/lib/api-base-url";
 import { getErrorToastMessage } from "@/lib/submit-error";
 
-type Props = { cvId: number };
+type Props = { slug: string; cvId?: number };
 
 const formatTime = (iso?: string) => {
   if (!iso) return "";
@@ -45,11 +47,17 @@ const formatTime = (iso?: string) => {
   }
 };
 
-export default function CvEditorClient({ cvId }: Props) {
+export default function CvEditorClient({ slug, cvId: cvIdFromQuery }: Props) {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const { ai } = usePublicFeatures();
   const user = useAuthStore((s) => s.user);
   const isAuthed = Boolean(user?.id);
+  const numericSlug = /^\d+$/.test(slug) ? Number(slug) : NaN;
+  const cvId =
+    cvIdFromQuery && Number.isFinite(cvIdFromQuery) && cvIdFromQuery > 0
+      ? cvIdFromQuery
+      : numericSlug;
 
   const { data: cv, isLoading, isError } = useQuery({
     queryKey: ["cv", cvId],
@@ -74,6 +82,17 @@ export default function CvEditorClient({ cvId }: Props) {
     title?: string;
     content?: CvContent;
   } | null>(null);
+
+  useEffect(() => {
+    if (!cv) return;
+    const canonical = cvEditorPath(cv);
+    const pathSlug = decodeURIComponent(slug);
+    const expectedSlug = cv.template?.slug?.trim();
+    const onCanonical = expectedSlug
+      ? pathSlug === expectedSlug && cvIdFromQuery === cv.id
+      : pathSlug === String(cv.id);
+    if (!onCanonical) router.replace(canonical);
+  }, [cv, slug, cvIdFromQuery, router]);
 
   useEffect(() => {
     if (!cv) return;
@@ -251,7 +270,7 @@ export default function CvEditorClient({ cvId }: Props) {
         return cvService.updateCv(r.id, { status: "COMPLETED" });
       }),
     onSuccess: (updated) => {
-      queryClient.setQueryData(["cv", cvId], updated);
+      queryClient.setQueryData(["cv", updated.id], updated);
       queryClient.invalidateQueries({ queryKey: ["my-cvs"] });
       toast.success("Đã lưu hoàn tất CV");
     },

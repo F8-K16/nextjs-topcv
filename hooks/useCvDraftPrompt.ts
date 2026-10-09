@@ -4,6 +4,7 @@ import { useEffect, useMemo } from "react";
 
 import { CvListItem } from "@/app/types/cv.type";
 import { useModalStore } from "@/app/stores/modal.store";
+import { cvEditorPath } from "@/lib/cv-editor-path";
 
 export function useCvDraftPrompt(params: {
   cvs: CvListItem[];
@@ -29,6 +30,7 @@ export function useCvDraftPrompt(params: {
 
     openModal("cv-draft", {
       cvId: draft.id,
+      cvHref: cvEditorPath(draft),
       cvTitle: draft.title,
       cvThumbnailUrl: draft.template?.thumbnailUrl ?? null,
       cvLastEditedAt: draft.lastEditedAt,
