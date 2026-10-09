@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { API_BASE_URL } from "@/lib/api-base-url";
 import { nextFetchCache } from "@/lib/next-fetch-cache";
 import type { PublicBlogPost } from "@/app/types/blog.type";
-import { renderBlogHtml } from "@/lib/blog-content";
+import { BLOG_ARTICLE_CLASS, renderBlogHtml } from "@/lib/blog-content";
 import { jsonLdScript, getSiteUrl } from "@/lib/job-posting";
 import { formatDate } from "@/utils/helper";
 import { BreadcrumbDetailLabel } from "@/contexts/BreadcrumbDetailContext";
@@ -82,7 +82,7 @@ export default async function BlogDetailPage({
         </p>
       ) : null}
       <div
-        className="mt-6"
+        className={`mt-6 ${BLOG_ARTICLE_CLASS}`}
         dangerouslySetInnerHTML={{ __html: renderBlogHtml(post.content ?? "") }}
       />
     </div>

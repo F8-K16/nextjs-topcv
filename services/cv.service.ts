@@ -24,6 +24,7 @@ export const cvService = {
 
   async createTemplateAdmin(payload: {
     name: string;
+    slug?: string;
     description?: string | null;
     thumbnailUrl?: string | null;
     templateData: Record<string, unknown>;
@@ -44,6 +45,7 @@ export const cvService = {
     id: number,
     payload: {
       name?: string;
+      slug?: string;
       description?: string | null;
       thumbnailUrl?: string | null;
       templateData?: Record<string, unknown>;
@@ -83,10 +85,10 @@ export const cvService = {
     }
   },
 
-  async getTemplate(id: number): Promise<CvTemplate> {
+  async getTemplate(slug: string): Promise<CvTemplate> {
     try {
       const { data } = await axiosClient.get<CvTemplate>(
-        `/cv/templates/${id}`,
+        `/cv/templates/${encodeURIComponent(slug)}`,
       );
       return data;
     } catch (error) {

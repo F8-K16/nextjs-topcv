@@ -28,6 +28,7 @@ import {
   AdminToolbarRow,
 } from "@/components/admin/admin-page-header";
 import { STALE_ADMIN_BLOG_MS } from "@/lib/query-stale-time";
+import { revalidatePublicBlog } from "@/app/actions/blog.action";
 import { getErrorToastMessage } from "@/lib/submit-error";
 import { formatDate } from "@/utils/helper";
 
@@ -96,9 +97,14 @@ export function BlogAdminInner() {
           setDeleteLoading(true);
           try {
             await adminBlogService.remove(deleteId);
+            await qc.invalidateQueries({ queryKey: ["admin", "blog"] });
+            try {
+              await revalidatePublicBlog();
+            } catch {
+              // ignore public cache errors
+            }
             toast.success("Đã xóa");
             setDeleteId(null);
-            qc.invalidateQueries({ queryKey: ["admin", "blog"] });
           } catch (e) {
             toast.error(getErrorToastMessage(e) || "Không xóa được");
           } finally {

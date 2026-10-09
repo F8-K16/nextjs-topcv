@@ -28,6 +28,7 @@ import AdminPagination from "@/components/admin/AdminPagination";
 
 type FormState = {
   name: string;
+  slug: string;
   description: string;
   thumbnailUrl: string;
   status: boolean;
@@ -47,6 +48,7 @@ const emptyTemplateData = JSON.stringify(
 
 const toFormState = (template?: CvTemplate): FormState => ({
   name: template?.name ?? "",
+  slug: template?.slug ?? "",
   description: template?.description ?? "",
   thumbnailUrl: template?.thumbnailUrl ?? "",
   status: template?.status ?? true,
@@ -101,6 +103,7 @@ export default function CvTemplatesAdminTable() {
 
       const payload = {
         name: form.name.trim(),
+        slug: form.slug.trim() || undefined,
         description: form.description.trim() || null,
         thumbnailUrl: form.thumbnailUrl.trim() || null,
         status: form.status,
@@ -198,7 +201,12 @@ export default function CvTemplatesAdminTable() {
                     className="text-zinc-800 hover:bg-zinc-50 dark:text-zinc-200 dark:hover:bg-white/5"
                   >
                     <td className="px-4 py-3 text-sm text-zinc-900 dark:text-white">
-                      {template.name}
+                      <div>{template.name}</div>
+                      {template.slug ? (
+                        <div className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+                          /{template.slug}
+                        </div>
+                      ) : null}
                     </td>
                     <td className="px-4 py-3 text-sm text-zinc-600 dark:text-zinc-300">
                       {template.description || "—"}
@@ -261,6 +269,12 @@ export default function CvTemplatesAdminTable() {
             onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
             placeholder="Tên mẫu"
             className={adminInput}
+          />
+          <input
+            value={form.slug}
+            onChange={(e) => setForm((prev) => ({ ...prev, slug: e.target.value }))}
+            placeholder="Slug (để trống sẽ tạo từ tên)"
+            className={cn(adminInput, "mt-3")}
           />
           <div className="mt-3 rounded-xl border border-dashed border-zinc-300 bg-zinc-50/80 p-4 dark:border-white/15 dark:bg-white/5">
             <p className="text-sm font-medium text-zinc-800 dark:text-zinc-100">

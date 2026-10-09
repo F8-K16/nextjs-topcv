@@ -323,11 +323,11 @@ export default function JobsTable({ data }: { data: JobsResponse }) {
                   "uppercase tracking-wide",
                 )}
               >
-                <th className="px-4 py-3">Việc làm</th>
-                <th className="px-4 py-3">Công ty</th>
-                <th className="px-4 py-3">Địa điểm</th>
-                <th className="px-4 py-3">Lương</th>
-                <th className="px-4 py-3">Hạn</th>
+                <th className="min-w-[14rem] px-4 py-3">Việc làm</th>
+                <th className="min-w-[9rem] px-4 py-3">Công ty</th>
+                <th className="w-24 max-w-[6.5rem] px-2 py-3">Địa điểm</th>
+                <th className="whitespace-nowrap px-4 py-3">Lương</th>
+                <th className="whitespace-nowrap px-4 py-3">Hạn</th>
                 <th className="px-4 py-3">Trạng thái</th>
                 <th className="px-4 py-3 text-right">Thao tác</th>
               </tr>
@@ -343,7 +343,15 @@ export default function JobsTable({ data }: { data: JobsResponse }) {
                   </td>
                 </tr>
               )}
-              {jobs.map((job, index) => (
+              {jobs.map((job, index) => {
+                const place =
+                  job.workLocation ||
+                  [job.company?.district?.name, job.company?.province?.name]
+                    .filter(Boolean)
+                    .join(", ") ||
+                  job.company?.location ||
+                  "—";
+                return (
                 <motion.tr
                   key={job.id}
                   initial={{ opacity: 0 }}
@@ -380,18 +388,17 @@ export default function JobsTable({ data }: { data: JobsResponse }) {
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">
-                    {job.company?.name}
+                  <td className="max-w-[11rem] px-4 py-3 text-zinc-600 dark:text-zinc-400">
+                    <span className="line-clamp-2" title={job.company?.name}>
+                      {job.company?.name}
+                    </span>
                   </td>
-                  <td className="px-4 py-3 text-xs text-zinc-600 dark:text-zinc-400">
-                    {job.workLocation ||
-                      [job.company?.district?.name, job.company?.province?.name]
-                        .filter(Boolean)
-                        .join(", ") ||
-                      job.company?.location ||
-                      "—"}
+                  <td className="w-24 max-w-[6.5rem] px-2 py-3 text-xs text-zinc-600 dark:text-zinc-400">
+                    <span className="block truncate" title={place}>
+                      {place}
+                    </span>
                   </td>
-                  <td className="px-4 py-3 font-medium text-emerald-700 dark:text-emerald-300/90">
+                  <td className="whitespace-nowrap px-4 py-3 font-medium text-emerald-700 dark:text-emerald-300/90">
                     {formatSalaryShort(job.minSalary, job.maxSalary)}
                   </td>
                   <td className="px-4 py-3 text-xs text-zinc-600 dark:text-zinc-400">
@@ -553,7 +560,8 @@ export default function JobsTable({ data }: { data: JobsResponse }) {
                     </div>
                   </td>
                 </motion.tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>

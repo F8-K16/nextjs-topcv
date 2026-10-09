@@ -72,13 +72,13 @@ function segmentLabel(segment: string, segments: string[], index: number) {
   }
   if (SEGMENT_LABELS[segment]) return SEGMENT_LABELS[segment];
   if (parent === "companies") return "Chi tiết công ty";
+  if (parent === "templates") return "Chi tiết mẫu";
   if (/^\d+$/.test(segment)) {
     if (parent === "jobs") return "Chi tiết tin";
     if (parent === "companies") return "Chi tiết công ty";
     if (parent === "notifications") return "Chi tiết";
     if (parent === "candidate") return "Ứng viên";
     if (parent === "editor") return "Bản CV";
-    if (parent === "templates") return "Chi tiết mẫu";
     if (parent === "shared" || parent === "public") return "CV";
     return "Chi tiết";
   }

@@ -8,6 +8,7 @@ import { ArrowLeft, Loader2, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { cvService } from "@/services/cv.service";
+import { cvTemplatePublicPath } from "@/lib/cv-template-path";
 import {
   GC_DEFAULT_MS,
   STALE_CV_TEMPLATE_DETAIL_MS,
@@ -19,9 +20,9 @@ import { useCvDraftPrompt } from "@/hooks/useCvDraftPrompt";
 import type { CvListItem } from "@/app/types/cv.type";
 import CvCanvas from "../../_components/CvCanvas";
 
-type Props = { templateId: number };
+type Props = { templateKey: string };
 
-export default function CvTemplatePreviewClient({ templateId }: Props) {
+export default function CvTemplatePreviewClient({ templateKey }: Props) {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const loadingAuth = useAuthStore((s) => s.loadingAuth);
@@ -29,11 +30,11 @@ export default function CvTemplatePreviewClient({ templateId }: Props) {
   const isCandidate = Boolean(user?.roles?.includes("CANDIDATE"));
 
   const { data: template, isLoading, isError } = useQuery({
-    queryKey: ["cv-template", templateId],
-    queryFn: () => cvService.getTemplate(templateId),
+    queryKey: ["cv-template", templateKey],
+    queryFn: () => cvService.getTemplate(templateKey),
     staleTime: STALE_CV_TEMPLATE_DETAIL_MS,
     gcTime: GC_DEFAULT_MS,
-    enabled: Number.isFinite(templateId),
+    enabled: templateKey.trim().length > 0,
   });
 
   const previewContent = useMemo(() => {
@@ -64,7 +65,7 @@ export default function CvTemplatePreviewClient({ templateId }: Props) {
   });
 
   const createMutation = useMutation({
-    mutationFn: () => cvService.createCv({ templateId }),
+    mutationFn: (templateId: number) => cvService.createCv({ templateId }),
     onSuccess: (cv) => {
       toast.success("Đã tạo CV nháp");
       router.push(`/cv/editor/${cv.id}`);
@@ -75,12 +76,15 @@ export default function CvTemplatePreviewClient({ templateId }: Props) {
   });
 
   const handleUseTemplate = () => {
+    if (!template) return;
     if (!isAuthed) {
       toast.info("Vui lòng đăng nhập để sử dụng mẫu CV");
-      router.push(`/auth/login?next=/cv/templates/${templateId}`);
+      router.push(
+        `/auth/login?next=${encodeURIComponent(cvTemplatePublicPath(template))}`,
+      );
       return;
     }
-    createMutation.mutate();
+    createMutation.mutate(template.id);
   };
 
   if (isLoading) {

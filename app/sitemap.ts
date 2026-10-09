@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { API_BASE_URL } from "@/lib/api-base-url";
 import { companyPublicPath } from "@/lib/company-path";
+import { cvTemplatePublicPath } from "@/lib/cv-template-path";
 import { jobPublicPath } from "@/lib/job-path";
 import { getSiteUrl } from "@/lib/job-posting";
 import { nextFetchCache } from "@/lib/next-fetch-cache";
@@ -45,6 +46,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/contact",
     "/blog",
     "/salary-insights",
+    "/cv/templates",
   ].map((path) => ({
     url: `${site}${path || "/"}`,
     lastModified: now,
@@ -100,6 +102,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     nextFetchCache.blog as RequestInit,
   );
 
+  let cvTemplates: { id: number; slug?: string | null; updatedAt?: string }[] =
+    [];
+  if (API_BASE_URL) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/cv/templates`, {
+        next: { revalidate: 3600 },
+      });
+      if (res.ok) {
+        const body = (await res.json()) as {
+          templates?: { id: number; slug?: string | null; updatedAt?: string }[];
+        };
+        cvTemplates = body.templates ?? [];
+      }
+    } catch {
+      cvTemplates = [];
+    }
+  }
+
   return [
     ...staticRoutes,
     ...jobs.map((job) => ({
@@ -117,6 +137,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...posts.map((post) => ({
       url: `${site}/blog/${post.slug}`,
       lastModified: post.updatedAt ? new Date(post.updatedAt) : now,
+      changeFrequency: "weekly" as const,
+      priority: 0.5,
+    })),
+    ...cvTemplates.map((template) => ({
+      url: `${site}${cvTemplatePublicPath(template)}`,
+      lastModified: template.updatedAt ? new Date(template.updatedAt) : now,
       changeFrequency: "weekly" as const,
       priority: 0.5,
     })),

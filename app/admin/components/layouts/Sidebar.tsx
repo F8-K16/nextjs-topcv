@@ -25,8 +25,14 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { useAuthStore } from "@/app/stores/auth.store";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   ADMIN_NAV_GROUP_ORDER,
   ADMIN_NAV_ITEMS,
@@ -159,18 +165,18 @@ export default function Sidebar({
             ) : (
               <>
                 <Image
-                  src="/images/logo-default.png"
+                  src="/images/logo-mark.png"
                   alt="TopCV"
-                  width={40}
-                  height={40}
-                  className="block h-9 w-9 rounded-lg object-cover object-[28%_center] ring-1 ring-zinc-200/80 dark:hidden"
+                  width={36}
+                  height={36}
+                  className="block h-8 w-8 object-contain dark:hidden"
                 />
                 <Image
-                  src="/images/logo-dark.png"
+                  src="/images/logo-mark-dark.png"
                   alt=""
-                  width={40}
-                  height={40}
-                  className="hidden h-9 w-9 rounded-lg object-cover object-[28%_center] ring-1 ring-white/15 dark:block"
+                  width={36}
+                  height={36}
+                  className="hidden h-8 w-8 object-contain dark:block"
                   aria-hidden
                 />
               </>
@@ -191,74 +197,88 @@ export default function Sidebar({
           )}
         </button>
 
-        <nav className="admin-sidebar-scroll mt-5 flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden pb-3">
-          {grouped.map((group, gi) => (
-            <div
-              key={group.label}
-              className={cn(gi > 0 && "mt-3 border-t border-zinc-100 pt-3 dark:border-white/10")}
-            >
-              {showLabels ? (
-                <p className="mb-1 px-2.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-400 dark:text-zinc-500">
-                  {group.label}
-                </p>
-              ) : null}
-              <div className="flex flex-col gap-0.5">
-                {group.items.map((item) => {
-                  const IconComponent = ICONS[item.icon];
-                  const isActive =
-                    item.href === "/admin"
-                      ? pathname === "/admin"
-                      : pathname === item.href ||
-                        pathname.startsWith(`${item.href}/`);
+        <TooltipProvider delayDuration={120}>
+          <nav className="admin-sidebar-scroll mt-5 flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden pb-3">
+            {grouped.map((group, gi) => (
+              <div
+                key={group.label}
+                className={cn(gi > 0 && "mt-3 border-t border-zinc-100 pt-3 dark:border-white/10")}
+              >
+                {showLabels ? (
+                  <p className="mb-1 px-2.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-400 dark:text-zinc-500">
+                    {group.label}
+                  </p>
+                ) : null}
+                <div className="flex flex-col gap-0.5">
+                  {group.items.map((item) => {
+                    const IconComponent = ICONS[item.icon];
+                    const isActive =
+                      item.href === "/admin"
+                        ? pathname === "/admin"
+                        : pathname === item.href ||
+                          pathname.startsWith(`${item.href}/`);
 
-                  return (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      onClick={() => {
-                        if (!isLg) onMobileClose();
-                      }}
-                      className={cn(
-                        "group relative flex touch-manipulation items-center rounded-lg px-2.5 py-2 text-[13px] font-medium text-zinc-600 transition-colors duration-150 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-white/10 dark:hover:text-white",
-                        !showLabels && "lg:justify-center lg:px-2",
-                        isActive &&
-                          "bg-violet-50 text-violet-800 hover:bg-violet-50 hover:text-violet-800 dark:bg-violet-500/15 dark:text-violet-100 dark:hover:bg-violet-500/15 dark:hover:text-violet-100",
-                      )}
-                    >
-                      {isActive ? (
-                        <span className="absolute inset-y-1.5 left-0 w-[3px] rounded-full bg-violet-600 dark:bg-violet-400" />
-                      ) : null}
-                      {IconComponent ? (
-                        <span
-                          className={cn(
-                            "flex shrink-0",
-                            !showLabels && "lg:mx-auto",
-                            isActive
-                              ? "text-violet-600 dark:text-violet-300"
-                              : "text-zinc-400 group-hover:text-zinc-700 dark:text-zinc-500 dark:group-hover:text-zinc-200",
-                          )}
-                        >
-                          <IconComponent size={18} strokeWidth={1.9} />
-                        </span>
-                      ) : null}
-                      <span
+                    const link = (
+                      <Link
+                        href={item.href}
+                        onClick={() => {
+                          if (!isLg) onMobileClose();
+                        }}
                         className={cn(
-                          "min-w-0 truncate whitespace-nowrap",
-                          SIDEBAR_CONTENT_TRANSITION,
-                          showLabels
-                            ? "ml-2.5 max-w-56 opacity-100"
-                            : "ml-0 max-w-0 overflow-hidden opacity-0 lg:ml-0",
+                          "group relative flex touch-manipulation items-center rounded-lg px-2.5 py-2 text-[13px] font-medium text-zinc-600 transition-colors duration-150 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-white/10 dark:hover:text-white",
+                          !showLabels && "lg:justify-center lg:px-2",
+                          isActive &&
+                            "bg-violet-50 text-violet-800 hover:bg-violet-50 hover:text-violet-800 dark:bg-violet-500/15 dark:text-violet-100 dark:hover:bg-violet-500/15 dark:hover:text-violet-100",
                         )}
                       >
-                        {item.name}
-                      </span>
-                    </Link>
-                  );
-                })}
+                        {isActive ? (
+                          <span className="absolute inset-y-1.5 left-0 w-[3px] rounded-full bg-violet-600 dark:bg-violet-400" />
+                        ) : null}
+                        {IconComponent ? (
+                          <span
+                            className={cn(
+                              "flex shrink-0",
+                              !showLabels && "lg:mx-auto",
+                              isActive
+                                ? "text-violet-600 dark:text-violet-300"
+                                : "text-zinc-400 group-hover:text-zinc-700 dark:text-zinc-500 dark:group-hover:text-zinc-200",
+                            )}
+                          >
+                            <IconComponent size={18} strokeWidth={1.9} />
+                          </span>
+                        ) : null}
+                        <span
+                          className={cn(
+                            "min-w-0 truncate whitespace-nowrap",
+                            SIDEBAR_CONTENT_TRANSITION,
+                            showLabels
+                              ? "ml-2.5 max-w-56 opacity-100"
+                              : "ml-0 max-w-0 overflow-hidden opacity-0 lg:ml-0",
+                          )}
+                        >
+                          {item.name}
+                        </span>
+                      </Link>
+                    );
+
+                    if (showLabels) {
+                      return <Fragment key={item.name}>{link}</Fragment>;
+                    }
+
+                    return (
+                      <Tooltip key={item.name}>
+                        <TooltipTrigger asChild>{link}</TooltipTrigger>
+                        <TooltipContent side="right" align="center">
+                          {item.name}
+                        </TooltipContent>
+                      </Tooltip>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
-        </nav>
+            ))}
+          </nav>
+        </TooltipProvider>
       </div>
     </aside>
   );

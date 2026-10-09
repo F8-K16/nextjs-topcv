@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { cvTemplatePublicPath } from "./cv-template-path";
 import { readPublicFeatures } from "./public-features";
 import { buildJobPostingJsonLd } from "./job-posting";
 
@@ -45,5 +46,14 @@ describe("buildJobPostingJsonLd", () => {
       "@type": "Place",
       address: { addressCountry: "VN", addressLocality: "Hà Nội: Cầu Giấy" },
     });
+  });
+});
+
+describe("cvTemplatePublicPath", () => {
+  it("prefers slug over numeric id", () => {
+    expect(cvTemplatePublicPath({ id: 3, slug: "toi-gian" })).toBe(
+      "/cv/templates/toi-gian",
+    );
+    expect(cvTemplatePublicPath({ id: 3, slug: null })).toBe("/cv/templates/3");
   });
 });

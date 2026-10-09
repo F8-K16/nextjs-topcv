@@ -43,13 +43,13 @@ export const formatSalaryShort = (min?: number, max?: number) => {
 
   const toTrieu = (value: number) => Math.round(value / 1_000_000);
   if (min && max) {
-    return `${toTrieu(min)} - ${toTrieu(max)} triệu`;
+    return `${toTrieu(min)}\u00a0-\u00a0${toTrieu(max)}\u00a0triệu`;
   }
   if (min) {
-    return `Từ ${toTrieu(min)} triệu`;
+    return `Từ\u00a0${toTrieu(min)}\u00a0triệu`;
   }
 
-  return `Đến ${toTrieu(max!)} triệu`;
+  return `Đến\u00a0${toTrieu(max!)}\u00a0triệu`;
 };
 
 export const formatCurrency = (value?: number) => {

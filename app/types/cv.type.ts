@@ -26,6 +26,7 @@ export type CvTemplateData = {
 export type CvTemplateSummary = {
   id: number;
   name: string;
+  slug?: string | null;
   description?: string | null;
   thumbnailUrl?: string | null;
   status?: boolean;

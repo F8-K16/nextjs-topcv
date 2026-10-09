@@ -14,6 +14,7 @@ import {
 import { useAuthStore } from "@/app/stores/auth.store";
 import { useCvDraftPrompt } from "@/hooks/useCvDraftPrompt";
 import { CvListItem } from "@/app/types/cv.type";
+import { cvTemplatePublicPath } from "@/lib/cv-template-path";
 
 const TEMPLATE_TAGS = ["Phổ biến", "Đơn giản", "Chuyên nghiệp"];
 
@@ -85,7 +86,7 @@ export default function CvTemplatesGallery() {
         return (
           <Link
             key={tpl.id}
-            href={`/cv/templates/${tpl.id}`}
+            href={cvTemplatePublicPath(tpl)}
             className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm ring-1 ring-slate-200/30 transition hover:-translate-y-0.5 hover:border-[#00b14f]/30 hover:shadow-md"
           >
             <div className="relative aspect-5/4 overflow-hidden bg-linear-to-br from-[#e8f6ec] via-white to-slate-50">
