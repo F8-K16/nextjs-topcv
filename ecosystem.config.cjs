@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: "jobportal-web",
+      name: "topcv-web",
       script: "node_modules/next/dist/bin/next",
       args: "start -p 3001",
       cwd: __dirname,
@@ -9,6 +9,7 @@ module.exports = {
       instances: 1,
       env: {
         NODE_ENV: "production",
+        PORT: 3001,
       },
     },
   ],
