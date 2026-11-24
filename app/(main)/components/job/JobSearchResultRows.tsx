@@ -12,6 +12,7 @@ import {
 } from "@/utils/helper";
 import AppliedJobBadge from "@/app/(main)/components/badges/AppliedJobBadge";
 import { jobPublicPath } from "@/lib/job-path";
+import { companyLogoSrc } from "@/lib/company-logo";
 
 export default function JobSearchResultRows({ jobs }: { jobs: Job[] }) {
   return (
@@ -27,7 +28,7 @@ export default function JobSearchResultRows({ jobs }: { jobs: Job[] }) {
           >
             <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-gray-50 sm:h-20 sm:w-20 md:h-24 md:w-24">
               <Image
-                src={job.company.logo || "/images/logo-default.png"}
+                src={companyLogoSrc(job.company.logo)}
                 alt={job.company.name}
                 fill
                 sizes="(max-width: 640px) 56px, (max-width: 768px) 80px, 96px"

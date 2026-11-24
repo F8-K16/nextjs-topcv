@@ -37,6 +37,7 @@ import { API_BASE_URL } from "@/lib/api-base-url";
 import { fetchPublicFeatures } from "@/lib/public-features";
 import { buildJobPostingJsonLd, jsonLdScript } from "@/lib/job-posting";
 import { jobPublicPath } from "@/lib/job-path";
+import { companyLogoSrc } from "@/lib/company-logo";
 import JobViewSourceTracker from "./JobViewSourceTracker";
 
 async function getJob(key: string): Promise<Job | null> {
@@ -64,7 +65,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const path = jobPublicPath(job);
   const site =
     process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-    "http://localhost:3001";
+    "http://localhost:3101";
   return {
     title,
     description,
@@ -137,7 +138,7 @@ export default async function JobDetailPage({ params }: Props) {
         "@type": "ListItem",
         position: 1,
         name: "Trang chủ",
-        item: (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3001").replace(
+        item: (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3101").replace(
           /\/$/,
           "",
         ),
@@ -146,13 +147,13 @@ export default async function JobDetailPage({ params }: Props) {
         "@type": "ListItem",
         position: 2,
         name: "Việc làm",
-        item: `${(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3001").replace(/\/$/, "")}/jobs`,
+        item: `${(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3101").replace(/\/$/, "")}/jobs`,
       },
       {
         "@type": "ListItem",
         position: 3,
         name: job.title,
-        item: `${(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3001").replace(/\/$/, "")}${jobPublicPath(job)}`,
+        item: `${(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3101").replace(/\/$/, "")}${jobPublicPath(job)}`,
       },
     ],
   };
@@ -299,7 +300,7 @@ export default async function JobDetailPage({ params }: Props) {
               </h3>
               <div className="mt-4 flex gap-4">
                 <Image
-                  src={job.company.logo || "/images/logo-default.png"}
+                  src={companyLogoSrc(job.company.logo)}
                   alt={job.company.name}
                   width={64}
                   height={64}

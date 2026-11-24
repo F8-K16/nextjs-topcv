@@ -15,6 +15,7 @@ import { companyService } from "@/services/company.service";
 import { STALE_PUBLIC_COMPANY_LIST_MS } from "@/lib/query-stale-time";
 import { companyFiltersToStableQuery } from "@/lib/stable-query-key";
 import { companyPublicPath } from "@/lib/company-path";
+import { companyLogoSrc } from "@/lib/company-logo";
 
 export default function CompanySection() {
   const { filters, setFilter } = useCompanyFilterStore();
@@ -63,7 +64,7 @@ export default function CompanySection() {
             <div className="flex gap-3">
               <div className="h-20 w-20 flex items-center justify-center rounded-lg bg-white overflow-hidden">
                 <Image
-                  src={company.logo || "/images/logo-default.png"}
+                  src={companyLogoSrc(company.logo)}
                   alt={company.name}
                   width={64}
                   height={64}

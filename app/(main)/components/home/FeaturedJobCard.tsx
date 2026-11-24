@@ -8,6 +8,7 @@ import { formatSalaryShort } from "@/utils/helper";
 import SaveJobButton from "../buttons/SaveJobButton";
 import AppliedJobBadge from "../badges/AppliedJobBadge";
 import { jobPublicPath } from "@/lib/job-path";
+import { companyLogoSrc } from "@/lib/company-logo";
 
 export default function FeaturedJobCard({ job }: { job: Job }) {
   return (
@@ -16,7 +17,7 @@ export default function FeaturedJobCard({ job }: { job: Job }) {
         <div className="flex gap-3">
           <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-zinc-50 ring-1 ring-zinc-100">
             <Image
-              src={job.company.logo || "/images/logo-default.png"}
+              src={companyLogoSrc(job.company.logo)}
               alt=""
               width={56}
               height={56}

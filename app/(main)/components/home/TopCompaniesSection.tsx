@@ -5,6 +5,7 @@ import { Briefcase, ChevronRight } from "lucide-react";
 import type { Company } from "@/app/types/company.type";
 import { formatGeographyLine } from "@/utils/helper";
 import { companyPublicPath } from "@/lib/company-path";
+import { companyLogoSrc } from "@/lib/company-logo";
 
 export default function TopCompaniesSection({
   companies,
@@ -43,7 +44,7 @@ export default function TopCompaniesSection({
               <div className="flex items-start gap-3">
                 <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-zinc-50 ring-1 ring-zinc-100">
                   <Image
-                    src={c.logo || "/images/logo-default.png"}
+                    src={companyLogoSrc(c.logo)}
                     alt=""
                     width={56}
                     height={56}

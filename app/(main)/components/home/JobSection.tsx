@@ -18,6 +18,7 @@ import AppliedJobBadge from "../badges/AppliedJobBadge";
 import { STALE_PUBLIC_JOB_LIST_MS } from "@/lib/query-stale-time";
 import { jobFiltersToStableQuery } from "@/lib/stable-query-key";
 import { jobPublicPath } from "@/lib/job-path";
+import { companyLogoSrc } from "@/lib/company-logo";
 
 export default function JobSection() {
   const { filters, setFilter } = useJobFilterStore();
@@ -93,7 +94,7 @@ export default function JobSection() {
                 <div className="flex gap-3">
                   <div className="h-16 w-16 overflow-hidden rounded-sm bg-gray-50">
                     <Image
-                      src={job.company.logo || "/images/logo-default.png"}
+                      src={companyLogoSrc(job.company.logo)}
                       alt={job.company.name}
                       width={63}
                       height={63}

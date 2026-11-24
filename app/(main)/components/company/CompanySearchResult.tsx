@@ -5,6 +5,7 @@ import type { CompanyResponse } from "@/app/types/company.type";
 import { nextFetchCache } from "@/lib/next-fetch-cache";
 import { API_BASE_URL } from "@/lib/api-base-url";
 import { companyPublicPath } from "@/lib/company-path";
+import { companyLogoSrc } from "@/lib/company-logo";
 
 export const COMPANIES_LIST_PAGE_SIZE = 12;
 
@@ -68,7 +69,7 @@ export default async function CompanySearchResult(props: Props) {
           >
             <div className="relative aspect-video w-full bg-zinc-50">
               <Image
-                src={c.logo || "/images/logo-default.png"}
+                src={companyLogoSrc(c.logo)}
                 alt={c.name}
                 fill
                 sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"

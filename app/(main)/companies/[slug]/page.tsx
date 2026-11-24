@@ -12,6 +12,7 @@ import CompanyFollowButton from "./CompanyFollowButton";
 import CompanyMapSection from "./CompanyMapSection";
 import { BreadcrumbDetailLabel } from "@/contexts/BreadcrumbDetailContext";
 import { API_BASE_URL } from "@/lib/api-base-url";
+import { companyLogoSrc } from "@/lib/company-logo";
 
 type CompanyPublic = Company & {
   jobs: Job[];
@@ -58,7 +59,7 @@ export default async function CompanyDetailPage({ params }: Props) {
             <div className="flex flex-col gap-6 md:flex-row md:items-start">
               <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-white/20 bg-white">
                 <Image
-                  src={company.logo || "/images/logo-default.png"}
+                  src={companyLogoSrc(company.logo)}
                   alt=""
                   fill
                   className="object-contain p-2"

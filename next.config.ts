@@ -22,6 +22,12 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "static.topcv.vn",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
         hostname: "www.topcv.vn",
         port: "",
         pathname: "/**",
@@ -42,7 +48,7 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     serverActions: {
-      allowedOrigins: ["localhost:3001", "nextcv.io.vn", "www.nextcv.io.vn"],
+      allowedOrigins: ["localhost:3101", "nextcv.io.vn", "www.nextcv.io.vn"],
     },
   },
 };

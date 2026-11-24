@@ -39,7 +39,7 @@ export function getSiteUrl() {
   const raw =
     process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
     process.env.FRONTEND_URL?.trim() ||
-    "http://localhost:3001";
+    "http://localhost:3101";
   return raw.replace(/\/$/, "");
 }
 
